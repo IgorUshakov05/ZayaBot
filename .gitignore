@@ -1,0 +1,11 @@
+# === Node ===
+core/node_modules/
+/payment/node_modules
+
+# === TypeScript build output ===
+/core/dist
+/payment/dist
+
+# === Environment variables ===
+/core/.env
+/payment/.env
