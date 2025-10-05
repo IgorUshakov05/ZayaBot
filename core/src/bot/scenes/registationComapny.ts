@@ -1,7 +1,9 @@
 import path from "path";
-import { join } from "./../../../node_modules/telegraf/src/core/helpers/formatting";
 import { Markup, Scenes, Context } from "telegraf";
-import { createCompanyAndUser } from "../../database/request/Company";
+import {
+  createCompanyAndUser,
+  delete_company,
+} from "../../database/request/Company";
 
 interface RegistrationState {
   title?: string;
@@ -16,7 +18,7 @@ type MyContext = Context &
     message?: { text?: string };
   };
 
-// --- Middleware для отмены регистрации ---
+// --- Middleware для отмены регистра ции ---
 const cancelMiddleware = async (ctx: MyContext) => {
   const text = ctx.message?.text;
   if (text === "❌ Прекратить регистрацию") {
@@ -35,6 +37,7 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
 
   // --- Шаг 1: Приветствие и ввод названия компании ---
   async (ctx) => {
+    if (await cancelMiddleware(ctx)) return;
     await ctx.reply(
       "🧾 Добро пожаловать в процесс регистрации вашей компании!\n\n" +
         "Регистрация состоит из 3 простых шагов:\n\n" +
@@ -59,7 +62,7 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
       return;
     }
 
-    ctx.wizard.state.title = title;
+    ctx.wizard.state.title = await title;
     await ctx.reply(
       `Отлично! "*${title}*" — прекрасное название. 🎉\n\n` +
         "Теперь укажите домен вашего сайта (например: example.com):",
@@ -73,7 +76,7 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
   },
 
   // --- Шаг 3: Проверка и сохранение домена ---
-  async (ctx) => {
+  async (ctx: any) => {
     if (await cancelMiddleware(ctx)) return;
 
     const domain = ctx.message?.text?.trim();
@@ -85,6 +88,22 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
     }
 
     ctx.wizard.state.domain = domain;
+    let createCompany = await createCompanyAndUser({
+      user: {
+        user_tag: ctx.from?.username as string,
+        name: ctx.from?.first_name as string,
+        chat_id: ctx.from.id,
+      },
+      company: {
+        domain: ctx.wizard.state.domain,
+        title: ctx.wizard.state.title,
+      },
+    });
+    if (!createCompany.success) {
+      await ctx.reply(createCompany.message);
+      return ctx.scene.leave();
+    }
+    console.log(createCompany);
     await ctx.reply(
       `Домен *${domain}* успешно принят! ✅\n\n` +
         "Следующий шаг — получение документации для интеграции:\n" +
@@ -93,7 +112,7 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
         parse_mode: "Markdown",
         ...Markup.keyboard([
           ["📄 Скачать документацию PDF"],
-          ["❌ Прекратить регистрацию"],
+          ["❌ Удалить компанию"],
         ]).resize(true),
       }
     );
@@ -107,22 +126,6 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
     const text = ctx.message?.text?.trim();
 
     if (text === "📄 Скачать документацию PDF") {
-      let createCompany = await createCompanyAndUser({
-        user: {
-          user_tag: ctx.from?.username as string,
-          name: ctx.from?.first_name as string,
-          chat_id: ctx.from.id,
-        },
-        company: {
-          domain: ctx.wizard.state.domain,
-          title: ctx.wizard.state.title,
-        },
-      });
-      if (!createCompany.success) {
-        await ctx.reply(createCompany.message);
-        return ctx.scene.leave();
-      }
-      console.log(createCompany);
       await ctx.reply(
         "📌 Инструкция отправлена! После скачивания, пожалуйста, " +
           "отправьте тестовую заявку на вашем сайте, чтобы подтвердить домен " +
@@ -139,7 +142,15 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
 
       return ctx.scene.leave();
     }
-
+    if (text === "❌ Удалить компанию") {
+      let delete_request = await delete_company({ chat_id: ctx.from.id });
+      console.log(delete_request);
+      await ctx.reply(delete_request.message, {
+        parse_mode: "Markdown",
+        ...Markup.removeKeyboard(),
+      });
+      return ctx.scene.leave();
+    }
     await ctx.reply("Нажмите «✅ Заявка отправлена».");
   }
 );

@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 import { ICompanySchema } from "../../types/CompanySchema";
-
+import { v4 as uuid } from "uuid";
 const CompanySchema = new Schema<ICompanySchema>(
   {
     title: { type: String, required: true },
@@ -12,7 +12,7 @@ const CompanySchema = new Schema<ICompanySchema>(
     //   enum: Object.values(Tariff),
     //   default: Tariff.FREE,
     // },
-    api_key: { type: String, required: true },
+    api_key: { type: String, required: true, default: () => uuid() },
     test: { type: Boolean, default: false },
   },
   { timestamps: true } // создаёт createdAt и updatedAt автоматически
