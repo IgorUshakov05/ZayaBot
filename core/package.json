@@ -12,6 +12,7 @@
   "description": "",
   "devDependencies": {
     "@types/express": "^5.0.3",
+    "@types/mongoose": "^5.11.96",
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.6.2",
     "@types/uuid": "^10.0.0",
@@ -21,5 +22,9 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "uuid": "^13.0.0"
+  },
+  "dependencies": {
+    "mongoose": "^8.19.0",
+    "telegraf": "^4.16.3"
   }
 }

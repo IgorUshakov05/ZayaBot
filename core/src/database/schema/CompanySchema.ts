@@ -1,0 +1,21 @@
+import { model, Schema } from "mongoose";
+import { ICompanySchema } from "../../types/CompanySchema";
+
+const CompanySchema = new Schema<ICompanySchema>(
+  {
+    title: { type: String, required: true },
+    domain: { type: String, unique: true },
+    users: [{ type: Schema.Types.ObjectId, ref: "User" }], // ссылки на пользователей
+    applications: [{ type: Schema.Types.ObjectId, ref: "Applications" }],
+    // tariff: {
+    //   type: String,
+    //   enum: Object.values(Tariff),
+    //   default: Tariff.FREE,
+    // },
+    api_key: { type: String, required: true },
+    test: { type: Boolean, default: false },
+  },
+  { timestamps: true } // создаёт createdAt и updatedAt автоматически
+);
+
+export const Company = model<ICompanySchema>("Company", CompanySchema);
