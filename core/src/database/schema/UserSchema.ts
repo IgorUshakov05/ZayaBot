@@ -24,6 +24,10 @@ const UserSchema = new Schema<IUser>(
         ref: "Payment",
       },
     ],
+    mute: {
+      type: Boolean,
+      default: false,
+    },
     payment_method: { type: Schema.Types.ObjectId, ref: "PaymentMethod" },
     chat_id: {
       type: Number,

@@ -4,6 +4,7 @@ import {
   createCompanyAndUser,
   delete_company,
 } from "../../database/request/Company";
+import { registrationCompany } from "../keyboards/registrationCompany";
 
 interface RegistrationState {
   title?: string;
@@ -44,7 +45,7 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
         "1️⃣ Введите *название вашей компании*:",
       {
         parse_mode: "Markdown",
-        ...Markup.keyboard([["❌ Прекратить регистрацию"]]).resize(true),
+        ...registrationCompany.cancel,
       }
     );
     return ctx.wizard.next();
@@ -68,7 +69,7 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
         "Теперь укажите домен вашего сайта (например: example.com):",
       {
         parse_mode: "Markdown",
-        ...Markup.keyboard([["❌ Прекратить регистрацию"]]).resize(true),
+        ...registrationCompany.cancel,
       }
     );
 
@@ -82,7 +83,7 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
     const domain = ctx.message?.text?.trim();
     if (!domain || !/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(domain)) {
       await ctx.reply(
-        "⚠️ Пожалуйста, введите корректный домен (например: example.com)."
+        "⚠️ Похоже, домен введён некорректно. Пожалуйста, укажите домен в формате example.com"
       );
       return;
     }
@@ -103,6 +104,7 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
       await ctx.reply(createCompany.message);
       return ctx.scene.leave();
     }
+    ctx.wizard.state.api_key = await createCompany.company?.api_key;
     console.log(createCompany);
     await ctx.reply(
       `Домен *${domain}* успешно принят! ✅\n\n` +
@@ -110,10 +112,7 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
         "Вы можете скачать инструкцию и пример документации для вашего сайта.",
       {
         parse_mode: "Markdown",
-        ...Markup.keyboard([
-          ["📄 Скачать документацию PDF"],
-          ["❌ Удалить компанию"],
-        ]).resize(true),
+        ...registrationCompany.finally,
       }
     );
 
@@ -124,12 +123,12 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
   async (ctx: any) => {
     if (await cancelMiddleware(ctx)) return;
     const text = ctx.message?.text?.trim();
-
+    console.log(ctx.wizard.state.api_key, " - апи ключ");
     if (text === "📄 Скачать документацию PDF") {
       await ctx.reply(
-        "📌 Инструкция отправлена! После скачивания, пожалуйста, " +
-          "отправьте тестовую заявку на вашем сайте, чтобы подтвердить домен " +
-          "и проверить корректность работы. Тестовая заявка за наш счёт! ✅",
+        `📌 *Инструкция отправлена!*
+Ваш API-ключ: \`${ctx.wizard.state.api_key}\`
+После внедрения, отправьте тестовую заявку на сайте, чтобы подтвердить домен и проверить корректность работы. Тестовая заявка за наш счёт! ✅`,
         {
           parse_mode: "Markdown",
           ...Markup.removeKeyboard(),
@@ -151,7 +150,6 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
       });
       return ctx.scene.leave();
     }
-    await ctx.reply("Нажмите «✅ Заявка отправлена».");
   }
 );
 

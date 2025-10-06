@@ -1,9 +1,17 @@
-import { Context, Markup } from "telegraf";
-const command_start = async (ctx: Context) => {
-  console.log(ctx.from);
-  console.log(ctx.chat);
+import { Context } from "telegraf";
+import { start } from "../keyboards/start";
+import { checkUserRole } from "../../database/request/User";
+import { Role } from "../../types/UserSchema";
+const command_start = async (ctx: Context & { chat: { id: number } }) => {
+  const user_check = await checkUserRole({ chat_id: ctx.chat.id });
 
-  const message = `
+  if (!user_check.success) {
+    // Ошибка сервера или базы данных
+    return ctx.reply(user_check.message);
+  }
+
+  if (user_check.newUser) {
+    const message = `
 👋 <b>Добро пожаловать в CRM-бот — ZayaBot!</b>  
 
 Мы — ваш <i>помощник для автоматизации работы с заявками с сайта!</i> 🚀  
@@ -17,12 +25,39 @@ const command_start = async (ctx: Context) => {
 ⚙️ <b>Простая интеграция:</b> Добавьте нашу библиотеку на сайт и начните за минуту.
 `;
 
-  await ctx.reply(message, {
-    parse_mode: "HTML",
-    ...Markup.keyboard([["Регистрация в 3 этапа"]])
-      .resize()
-      .oneTime(false),
-  });
+    return await ctx.reply(message, {
+      parse_mode: "HTML",
+      ...start.notAuth,
+    });
+  }
+
+  switch (user_check.role) {
+    case Role.director:
+      if (user_check.test_company) {
+        return ctx.reply(user_check.message);
+      }
+      // Директор с полноценной компанией — показать меню директора
+      return ctx.reply(
+        user_check.message
+        // Markup.keyboard([
+        //   ["👥 Менеджеры", "📋 Заявки"],
+        //   ["💰 Подписка", "📊 Аналитика"],
+        // ]).resize()
+      );
+
+    case Role.manager:
+      // Менеджер — показать меню менеджера
+      return ctx.reply(
+        user_check.message
+        // Markup.keyboard([["📋 Заявки"], ["📊 Аналитика"]]).resize()
+      );
+
+    default:
+      // Любая другая роль
+      return ctx.reply(
+        "⚠️ Ваша роль не определена. Обратитесь к администратору."
+      );
+  }
 };
 
 export default command_start;

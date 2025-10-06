@@ -9,6 +9,7 @@ export default interface IUser extends Document {
   name: string;
   role: Role;
   user_tag:string;
+  mute: boolean;
   chat_id: number;
   mail?: null | string;
   payment_method?: Types.ObjectId;
