@@ -1,8 +1,9 @@
+import { Company } from "./../schema/CompanySchema";
 import { Types } from "mongoose";
-import { Company } from "../schema/CompanySchema";
 import { User } from "../schema/UserSchema";
 import { v4 as uuidv4 } from "uuid";
 import { ICompanySchema } from "../../types/CompanySchema";
+import IUser, { Role } from "../../types/UserSchema";
 
 interface CreateCompanyParams {
   user: { user_tag: string; chat_id: number; name: string };
@@ -75,14 +76,80 @@ export async function createCompanyAndUser({
   }
 }
 
-export async function delete_company({ chat_id }: { chat_id: string }) {
+export async function is_verefy_company_of_director({
+  chat_id,
+  messageSuccess,
+}: {
+  chat_id: number;
+  messageSuccess: string;
+}): Promise<{ success: boolean; message: string }> {
+  try {
+    const findUser = await User.findOne({ chat_id }).populate<ICompanySchema>(
+      "company"
+    );
+
+    if (!findUser) {
+      return {
+        success: false,
+        message:
+          "🚫 Пользователь не найден. Пожалуйста, пройдите регистрацию заново.",
+      };
+    }
+
+    if (findUser.role !== Role.director) {
+      return {
+        success: false,
+        message: "⚠️ Только директор компании может выполнить это действие.",
+      };
+    }
+
+    if (!findUser.company) {
+      return {
+        success: false,
+        message:
+          "🏢 К вашему профилю не привязана компания.\n\n" +
+          "Создайте компанию через команду /create_company или свяжитесь с администратором.",
+      };
+    }
+
+    const company = findUser.company as unknown as ICompanySchema;
+
+    if (!company.test === false) {
+      return {
+        success: false,
+        message:
+          "🕓 Компания ожидает подтверждения.\n" +
+          "Пожалуйста, дождитесь проверки администрацией.",
+      };
+    }
+
+    return {
+      success: true,
+      message: messageSuccess,
+    };
+  } catch (error) {
+    console.error("Ошибка в is_verefy_company_of_director:", error);
+    return {
+      success: false,
+      message: "❗ Произошла внутренняя ошибка сервера. Попробуйте позже.",
+    };
+  }
+}
+
+export async function delete_company({
+  chat_id,
+  test,
+}: {
+  chat_id: number;
+  test: boolean;
+}) {
   try {
     const findUser = await User.findOne({ chat_id }).populate("company");
 
     if (!findUser) {
       return {
         success: false,
-        message: "⚠️ Вы не зарегистрированы в системе.",
+        message: "⚠️ Вы не зарегистрированы в системе",
       };
     }
 
@@ -104,7 +171,7 @@ export async function delete_company({ chat_id }: { chat_id: string }) {
     const company = findUser.company as any;
     console.log(company);
     await User.deleteMany({ company: company._id });
-    await Company.deleteOne({ _id: company._id, test: false });
+    await Company.deleteOne({ _id: company._id, test });
 
     return {
       success: true,

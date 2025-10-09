@@ -81,7 +81,12 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
     if (await cancelMiddleware(ctx)) return;
 
     const domain = ctx.message?.text?.trim();
-    if (!domain || !/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(domain)) {
+    if (
+      !domain ||
+      !/^(?=.{1,253}$)(?!-)(?:[a-zA-Z0-9\u00A1-\uFFFF](?:[a-zA-Z0-9\u00A1-\uFFFF-]{0,61}[a-zA-Z0-9\u00A1-\uFFFF])?\.)+[a-zA-Z\u00A1-\uFFFF]{2,}$/u.test(
+        domain
+      )
+    ) {
       await ctx.reply(
         "⚠️ Похоже, домен введён некорректно. Пожалуйста, укажите домен в формате example.com"
       );
@@ -142,8 +147,10 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
       return ctx.scene.leave();
     }
     if (text === "❌ Удалить компанию") {
-      let delete_request = await delete_company({ chat_id: ctx.from.id });
-      console.log(delete_request);
+      let delete_request = await delete_company({
+        chat_id: ctx.from.id,
+        test: true,
+      });
       await ctx.reply(delete_request.message, {
         parse_mode: "Markdown",
         ...Markup.removeKeyboard(),

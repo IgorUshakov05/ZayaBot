@@ -1,3 +1,5 @@
+import { managerMurkup } from "../keyboards/managers";
+
 // Обработчик сообщений
 const messageHandle = async (ctx: any) => {
   const text = ctx.message.text;
@@ -6,9 +8,12 @@ const messageHandle = async (ctx: any) => {
 
   switch (text) {
     case "Регистрация в 3 этапа":
-      ctx.scene.enter("registration"); 
+      ctx.scene.enter("registration");
       break;
 
+    case "👥 Менеджеры":
+      ctx.reply("awd", managerMurkup.first);
+      break;
     default:
       await ctx.reply("Пожалуйста, используйте кнопки.");
       break;

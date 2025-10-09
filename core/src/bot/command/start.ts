@@ -1,7 +1,8 @@
-import { Context } from "telegraf";
+import { Context, Markup } from "telegraf";
 import { start } from "../keyboards/start";
 import { checkUserRole } from "../../database/request/User";
 import { Role } from "../../types/UserSchema";
+import path from "path";
 const command_start = async (ctx: Context & { chat: { id: number } }) => {
   const user_check = await checkUserRole({ chat_id: ctx.chat.id });
 
@@ -34,16 +35,30 @@ const command_start = async (ctx: Context & { chat: { id: number } }) => {
   switch (user_check.role) {
     case Role.director:
       if (user_check.test_company) {
-        return ctx.reply(user_check.message);
+        await ctx.reply(user_check.message);
+        await ctx.reply(
+          `📌 *Инструкция для внедрения!*  
+Ваш API-ключ: \`${user_check.api_key}\`  
+
+После внедрения отправьте тестовую заявку на сайте, чтобы подтвердить домен и проверить корректность работы. Тестовая заявка — за наш счёт! ✅  
+
+Также, если при регистрации компании вы допустили ошибку в названии или домене, вы можете удалить компанию и создать её заново. ⚙️`,
+          {
+            parse_mode: "Markdown",
+            ...start.auth.test_company,
+          }
+        );
+
+        return await ctx.replyWithDocument({
+          source: path.join(__filename),
+          filename: "Документация.pdf",
+        });
       }
       // Директор с полноценной компанией — показать меню директора
-      return ctx.reply(
-        user_check.message
-        // Markup.keyboard([
-        //   ["👥 Менеджеры", "📋 Заявки"],
-        //   ["💰 Подписка", "📊 Аналитика"],
-        // ]).resize()
-      );
+      return ctx.reply(user_check.message, {
+        parse_mode: "Markdown",
+        ...start.auth.director,
+      });
 
     case Role.manager:
       // Менеджер — показать меню менеджера

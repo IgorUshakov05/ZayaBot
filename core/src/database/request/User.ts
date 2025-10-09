@@ -11,6 +11,7 @@ export const checkUserRole = async ({
   newUser: boolean;
   role?: Role;
   test_company: boolean;
+  api_key?: string;
   message: string;
 }> => {
   try {
@@ -34,10 +35,11 @@ export const checkUserRole = async ({
       return {
         success: true,
         newUser: false,
+        api_key: findUser.company.api_key,
         test_company: true,
         role: findUser.role,
         message:
-          "⚠️ Вы директор, но компания пока в тестовом режиме. Некоторые функции могут быть ограничены.",
+          "⚠️ Вы директор, но компания пока в тестовом режиме. Отправьте заявку чтобы активировать компанию!",
       };
     }
 
@@ -48,9 +50,8 @@ export const checkUserRole = async ({
         newUser: false,
         test_company: false,
         role: findUser.role,
-        message: `✅ Вы успешно вошли! Ваша роль: ${findUser.role}${
-          findUser.company ? `\nКомпания: ${findUser.company.title}` : ""
-        }`,
+        message: `*${findUser.name}*, здравствуйте!
+Выберите действие в меню ниже 👇`,
       };
     }
 

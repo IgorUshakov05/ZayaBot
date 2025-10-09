@@ -8,6 +8,7 @@ export enum Tariff {
 }
 
 export interface ICompanySchema {
+  _id: Types.ObjectId;
   title: string;
   domain: string;
   users: Types.ObjectId[];
