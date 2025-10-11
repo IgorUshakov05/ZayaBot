@@ -3,14 +3,25 @@ import { start } from "../keyboards/start";
 import { checkUserRole } from "../../database/request/User";
 import { Role } from "../../types/UserSchema";
 import path from "path";
-const command_start = async (ctx: Context & { chat: { id: number } }) => {
+
+const command_start = async (
+  ctx: Context & { chat: { id: number } } & { startPayload: string } & {
+    scene: any;
+  }
+) => {
   const user_check = await checkUserRole({ chat_id: ctx.chat.id });
 
   if (!user_check.success) {
     // Ошибка сервера или базы данных
     return ctx.reply(user_check.message);
   }
-
+  let code = ctx.startPayload;
+  if (code) {
+    ctx.scene.state.code = code;
+    console.log(ctx.scene.state.code);
+    await ctx.scene.enter("registration_user", { code });
+    return;
+  }
   if (user_check.newUser) {
     const message = `
 👋 <b>Добро пожаловать в CRM-бот — ZayaBot!</b>  

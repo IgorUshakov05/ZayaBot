@@ -9,13 +9,18 @@ import messageHandle from "./middlewares/onMessage";
 
 // Сцены
 import registrationWizard from "./scenes/registationComapny";
+import registrationUser from "./scenes/registrationUser";
+
 import removeTextCompany from "./action/removeCompany";
 
 // Типизация контекста для Wizard
 type MyContext = Scenes.WizardContext;
 
 const bot = new Telegraf<MyContext>(config.BOT_TOKEN);
-const stage = new Scenes.Stage<MyContext>([registrationWizard]);
+const stage = new Scenes.Stage<MyContext>([
+  registrationWizard,
+  registrationUser,
+]);
 bot.use(session());
 bot.use(stage.middleware());
 bot.start(command_start);
