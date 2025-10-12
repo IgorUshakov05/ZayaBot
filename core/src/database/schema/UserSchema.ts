@@ -43,6 +43,10 @@ const UserSchema = new Schema<IUser>(
       required: true,
       unique: true,
     },
+    payment_plan: {
+      type: String,
+      enum: ["START", "PRO", "ENTERPRISE"],
+    },
     mail: {
       type: String,
       required: false,

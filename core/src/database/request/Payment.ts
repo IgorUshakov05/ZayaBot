@@ -19,7 +19,6 @@ export const create_payment = async ({
 
     // Создаём корректную структуру данных
     const new_payment = await Payment.create({
-      id: uuidv4(), // уникальный идентификатор
       userId: user._id,
       payment_method_id,
       status,

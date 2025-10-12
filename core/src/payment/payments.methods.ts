@@ -62,7 +62,7 @@ export const create_pay = async (
           return_url: "https://t.me/zaya_crm_bot",
         },
         description: `Пополнение баланса на ${amount} руб.`,
-        metadata: { chat_id, paymentType },
+        metadata: { chat_id, paymentType, paymentPlan },
       },
       {
         auth: {

@@ -1,7 +1,12 @@
 import { Types } from "mongoose";
 import { ICompanySchema } from "../../types/CompanySchema";
 import { ICreateManager } from "../../types/PropsFuntion";
-import { PaymentType, Role } from "../../types/UserSchema";
+import {
+  PaymentPlan,
+  PaymentType,
+  PricePlan,
+  Role,
+} from "../../types/UserSchema";
 import { Code } from "../schema/CodeSchema";
 import { User } from "../schema/UserSchema";
 import { Company } from "../schema/CompanySchema";
@@ -117,6 +122,47 @@ export const upBalanceUser = async ({
     return { success: false, message: "Ошибка сервера при обновлении баланса" };
   }
 };
+
+export const setTariff = async ({
+  chat_id,
+  tariffType,
+  paymentType,
+}: {
+  chat_id: number;
+  tariffType: PaymentPlan;
+  paymentType: PaymentType;
+}): Promise<{ success: boolean; message: string }> => {
+  try {
+    const user = await User.findOne({ chat_id });
+
+    if (!user) {
+      return { success: false, message: "Пользователь не найден" };
+    }
+
+    // Обновляем тариф и тип оплаты
+    user.payment_plan = tariffType;
+    user.payment_type = paymentType;
+    await user.save();
+
+    // Формируем сообщение с информацией о тарифе и цене
+    const price = PricePlan[tariffType];
+
+    return {
+      success: true,
+      message:
+        `💳 *Тариф успешно выбран!*\n\n` +
+        `💎 Текущий тариф: *${tariffType}*\n` +
+        `💰 Стоимость тарифа: *${price} ₽*`,
+    };
+  } catch (error) {
+    console.error("Ошибка при установке тарифа:", error);
+    return {
+      success: false,
+      message: "❌ Ошибка сервера при установке тарифа",
+    };
+  }
+};
+
 export const checkUserRole = async ({
   chat_id,
 }: {

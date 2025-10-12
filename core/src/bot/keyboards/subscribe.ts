@@ -1,11 +1,11 @@
-// - [📋 Подписка]
+// - [📋 Тариф]
 // - [💸 Плата за заявку]
 import { Markup } from "telegraf";
 
 export const subscribeMurkap = {
   first: {
     ...Markup.keyboard([
-      ["📋 Подписка", "💸 Плата за заявку"],
+      ["📋 Тариф", "💸 Плата за заявку"],
       ["🏠 Главное меню"],
     ]).resize(true),
   },

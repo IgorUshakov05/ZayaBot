@@ -10,11 +10,15 @@ export enum PaymentType {
   FREE = "Free", // Ну а это дефолтик друзья
 }
 export enum PaymentPlan {
-  START = "Start",
-  PRO = "Pro",
-  ENTERPRISE = "Enterprise",
+  START = "START",
+  PRO = "PRO",
+  ENTERPRISE = "ENTERPRISE",
 }
-
+export const PricePlan: Record<PaymentPlan, number> = {
+  [PaymentPlan.START]: 0,
+  [PaymentPlan.PRO]: 499,
+  [PaymentPlan.ENTERPRISE]: 1499,
+};
 export default interface IUser extends Document {
   surname?: string;
   name: string;

@@ -1,5 +1,5 @@
 import { PaymentMethodType } from "./PaymentMethodSchema";
-import { PaymentType } from "./UserSchema";
+import { PaymentPlan, PaymentType } from "./UserSchema";
 
 export interface YooKassaWebhookBody {
   type: "notification";
@@ -52,6 +52,7 @@ export interface YooKassaWebhookBody {
     metadata: {
       chat_id: number;
       paymentType: PaymentType;
+      paymentPlan: PaymentPlan;
       [key: string]: any;
     };
 
