@@ -3,6 +3,8 @@ export enum PaymentMethodType {
   yoo_money = "yoo_money",
   sberbank = "sberbank",
   tinkoff_bank = "tinkoff_bank",
+  qiwi = "qiwi",
+
   sbp = "sbp",
 }
 

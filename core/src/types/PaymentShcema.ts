@@ -1,15 +1,15 @@
 import { Types } from "mongoose";
 
 export interface IPayment {
-  id: string; // payment.id из ЮKassa
-  userId: Types.ObjectId; // Привязка к пользователю
-  payment_method_id: string; // Ссылка на PaymentMethod
+  id: string;
+  userId: Types.ObjectId;
+  payment_method_id: string;
   status: "succeeded" | "pending" | "canceled";
   paid: boolean;
   amount: {
     value: number;
-    currency: string;
+    currency: "RUB" | "USD" | "EUR";
   };
-  createdAt: Date; // дата платежа
-  isAuto?: boolean; // автоплатёж или ручной
+  createdAt: Date;
+  isAuto?: boolean;
 }

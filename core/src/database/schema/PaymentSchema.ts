@@ -3,7 +3,6 @@ import { IPayment } from "../../types/PaymentShcema";
 
 const PaymentSchema = new Schema<IPayment>(
   {
-    id: { type: String, required: true, unique: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     payment_method_id: { type: String, required: true, ref: "PaymentMethod" },
     status: {
@@ -13,7 +12,7 @@ const PaymentSchema = new Schema<IPayment>(
     },
     paid: { type: Boolean, required: true },
     amount: {
-      value: { type: String, required: true },
+      value: { type: Number, required: true },
       currency: { type: String, required: true, default: "RUB" },
     },
     createdAt: { type: Date, required: true },

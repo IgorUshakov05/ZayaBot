@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { ICompanySchema } from "../../types/CompanySchema";
 import { ICreateManager } from "../../types/PropsFuntion";
-import { Role } from "../../types/UserSchema";
+import { PaymentType, Role } from "../../types/UserSchema";
 import { Code } from "../schema/CodeSchema";
 import { User } from "../schema/UserSchema";
 import { Company } from "../schema/CompanySchema";
@@ -87,9 +87,11 @@ export const createUser = async ({
 export const upBalanceUser = async ({
   chat_id,
   amount,
+  paymentType,
 }: {
   chat_id: number;
   amount: number;
+  paymentType: PaymentType;
 }): Promise<{ success: boolean; message: string }> => {
   try {
     const user = await User.findOne({ chat_id });
@@ -99,6 +101,7 @@ export const upBalanceUser = async ({
     }
 
     user.balance = (user.balance || 0) + Number(amount);
+    user.payment_type = paymentType;
     await user.save();
 
     return {

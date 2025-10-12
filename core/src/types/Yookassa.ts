@@ -1,3 +1,4 @@
+import { PaymentMethodType } from "./PaymentMethodSchema";
 import { PaymentType } from "./UserSchema";
 
 export interface YooKassaWebhookBody {
@@ -23,18 +24,10 @@ export interface YooKassaWebhookBody {
       account_id: string;
       gateway_id: string;
     };
-    payment_method?: {
-      type:
-        | "bank_card"
-        | "yoo_money"
-        | "sbp"
-        | "sberbank"
-        | "tinkoff_bank"
-        | "qiwi"
-        | "mobile_balance"
-        | string;
+    payment_method: {
+      type: PaymentMethodType;
       id: string;
-      saved?: boolean;
+      saved: boolean;
       status?: string;
       title?: string;
       account_number?: string;
@@ -43,11 +36,6 @@ export interface YooKassaWebhookBody {
       card?: {
         first6?: string;
         last4?: string;
-        expiry_month?: string;
-        expiry_year?: string;
-        card_type?: string;
-        issuer_country?: string;
-        issuer_name?: string;
       };
     };
     captured_at?: string;
