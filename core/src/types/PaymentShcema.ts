@@ -1,4 +1,4 @@
-import { model, Schema, Types } from "mongoose";
+import { Types } from "mongoose";
 
 export interface IPayment {
   id: string; // payment.id из ЮKassa

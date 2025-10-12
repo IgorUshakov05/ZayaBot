@@ -14,6 +14,15 @@ const UserSchema = new Schema<IUser>(
     user_tag: {
       type: String,
     },
+    payment_type: {
+      type: String,
+      enum: ["PerRequest", "Subscription", "Free"],
+      default: "Free",
+    },
+    balance: {
+      type: Number,
+      default: 0,
+    },
     role: {
       type: String,
       enum: ["manager", "director"],

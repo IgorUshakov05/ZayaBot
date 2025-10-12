@@ -91,7 +91,9 @@ const registrationManagerWizard = new Scenes.WizardScene<MyContext>(
     });
 
     if (result.success) {
-      await ctx.reply(result.message, Markup.removeKeyboard());
+      await ctx.reply(result.message, {
+        parse_mode: "Markdown",
+      });
     } else {
       await ctx.reply(
         `⚠️ Регистрация не удалась: ${result.message}`,

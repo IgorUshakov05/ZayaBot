@@ -73,10 +73,10 @@ const command_start = async (
 
     case Role.manager:
       // Менеджер — показать меню менеджера
-      return ctx.reply(
-        user_check.message
-        // Markup.keyboard([["📋 Заявки"], ["📊 Аналитика"]]).resize()
-      );
+      return ctx.reply(user_check.message, {
+        ...start.auth.manager,
+        parse_mode: "Markdown",
+      });
 
     default:
       // Любая другая роль

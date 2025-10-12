@@ -1,13 +1,9 @@
-import { Request, Response } from "express";
 import express from "express";
+import routerYoouKassa from "./webhook/router";
 const app = express();
 
 app.use(express.json());
 
-app.get("/", (req: Request, res: Response) => {
-  res.json({ data: "" });
-});
-
-app.post("/data", (req: Request, res: Response) => {});
+app.use(routerYoouKassa);
 
 export default app;

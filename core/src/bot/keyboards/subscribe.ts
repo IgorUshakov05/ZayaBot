@@ -16,11 +16,11 @@ export const subscribeMurkap = {
         { text: "💳 Выбрать Pro", callback_data: "tariff_pro" },
       ],
       [{ text: "💳 Выбрать Enterprise", callback_data: "tariff_enterprise" }],
-    ]), 
+    ]),
   },
   topup: {
     ...Markup.inlineKeyboard([
-      [{ text: "💳 Пополнить счёт", callback_data: "topup_balance" }],
+      [{ text: "Да! Хочу пополнить!", callback_data: "topup_balance" }],
     ]),
   },
 };

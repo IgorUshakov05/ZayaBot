@@ -1,8 +1,10 @@
+import { Types } from "mongoose";
 import { ICompanySchema } from "../../types/CompanySchema";
 import { ICreateManager } from "../../types/PropsFuntion";
 import { Role } from "../../types/UserSchema";
 import { Code } from "../schema/CodeSchema";
 import { User } from "../schema/UserSchema";
+import { Company } from "../schema/CompanySchema";
 
 export const createUser = async ({
   surname,
@@ -52,12 +54,23 @@ export const createUser = async ({
       company: searchCode.company._id,
       createdAt: new Date(),
     });
+
+    // 5️⃣ Добавляем пользователя в компанию через $push
+    const updatedCompany = await Company.findOneAndUpdate(
+      { _id: searchCode.company._id },
+      { $push: { users: newUser._id } }, // ← исправлено!
+      { new: true }
+    );
+
+    console.log("✅ Компания обновлена:", updatedCompany?.title);
+
+    // 6️⃣ Сохраняем пользователя
     await newUser.save();
 
-    // 5️⃣ При необходимости — удаляем код (чтобы нельзя было повторно использовать)
+    // 7️⃣ Удаляем использованный код
     await Code.deleteOne({ _id: searchCode._id });
 
-    // 6️⃣ Возвращаем успех
+    // 8️⃣ Возвращаем результат
     return {
       success: true,
       message: `✅ Регистрация прошла успешно!\nДобро пожаловать, *${name} ${surname}*.\nВаша роль: *${role}*`,
@@ -71,6 +84,36 @@ export const createUser = async ({
   }
 };
 
+export const upBalanceUser = async ({
+  chat_id,
+  amount,
+}: {
+  chat_id: number;
+  amount: number;
+}): Promise<{ success: boolean; message: string }> => {
+  try {
+    const user = await User.findOne({ chat_id });
+
+    if (!user) {
+      return { success: false, message: "Пользователь не найден" };
+    }
+
+    user.balance = (user.balance || 0) + Number(amount);
+    await user.save();
+
+    return {
+      success: true,
+
+      message:
+        `💰 *Баланс успешно пополнен!*\n\n` +
+        `➕ Пополнено: ${amount} ₽\n` +
+        `💎 Текущий баланс: ${user.balance} ₽`,
+    };
+  } catch (error) {
+    console.error("Ошибка при обновлении баланса:", error);
+    return { success: false, message: "Ошибка сервера при обновлении баланса" };
+  }
+};
 export const checkUserRole = async ({
   chat_id,
 }: {
@@ -131,9 +174,12 @@ export const checkUserRole = async ({
         newUser: false,
         test_company: false,
         role: findUser.role,
-        message: `✅ Вы успешно вошли! Ваша роль: ${findUser.role}${
-          findUser.company ? `\nКомпания: ${findUser.company.title}` : ""
-        }`,
+        message: `🎉 Добро пожаловать обратно, *${findUser.name}*!
+
+Вы успешно вошли в систему.
+👤 Роль: *${findUser.role}*${
+          findUser.company ? `\n🏢 Компания: *${findUser.company.title}*` : ""
+        }.`,
       };
     }
 

@@ -1,5 +1,7 @@
 import { Markup } from "telegraf";
-
+// - [✏️ Изменить данные]
+// - [🔔 Настроить уведомления]
+// - [📊 Статистика]
 export const start = {
   auth: {
     director: {
@@ -8,7 +10,12 @@ export const start = {
         ["💰 Подписка", "📊 Аналитика"],
       ]).resize(),
     },
-    manager: {},
+    manager: {
+      ...Markup.keyboard([
+        ["✏️ Изменить данные", "📊 Статистика"],
+        ["🔔 Настроить уведомления"],
+      ]).resize(),
+    },
     test_company: {
       ...Markup.inlineKeyboard([
         { text: "Удалить компанию", callback_data: "remove_test_company" },
