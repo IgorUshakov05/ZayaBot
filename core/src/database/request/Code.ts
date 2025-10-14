@@ -1,4 +1,4 @@
-import { Role } from "./../../types/UserSchema";
+import { PaymentType, Role } from "./../../types/UserSchema";
 import { ICompanySchema } from "../../types/CompanySchema";
 import { Code } from "../schema/CodeSchema";
 import { User } from "../schema/UserSchema";
@@ -38,7 +38,16 @@ export const createCode = async ({
       };
     }
 
-    // Создаём код
+    if (
+      user.payment_type === PaymentType.FREE &&
+      user.company.users.length >= 2
+    ) {
+      return {
+        success: false,
+        message: `⚠️ По вашему тарифному плану нельзя добавить более одного менеджера. 
+Для подключения дополнительных сотрудников обновите тарифный план.`,
+      };
+    }
     const newCode = new Code({
       role,
       company: user.company._id,
