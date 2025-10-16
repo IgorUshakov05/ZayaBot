@@ -2,8 +2,10 @@ import command_start from "../command/start";
 import { analiticsMurkup } from "../keyboards/analitics";
 import { applicationMurkup } from "../keyboards/Application";
 import { managerMurkup } from "../keyboards/managers";
+import { settingNotification } from "../keyboards/notification";
 import { subscribeMurkap } from "../keyboards/subscribe";
 import newManager from "./addManager";
+import notificationMessageEvent from "./notification";
 
 // Обработчик сообщений
 const messageHandle = async (ctx: any) => {
@@ -58,6 +60,7 @@ const messageHandle = async (ctx: any) => {
     case "➕ Добавить менеджера":
       newManager(ctx);
       break;
+
     case "💸 Плата за заявку":
       ctx.reply(
         `💸 *Плата за заявку*
@@ -94,6 +97,10 @@ const messageHandle = async (ctx: any) => {
         "📋 Управление заявками!\nЧто делаем?",
         applicationMurkup.first
       );
+      break;
+
+    case "🔔 Настроить уведомления":
+      notificationMessageEvent(ctx);
       break;
 
     default:

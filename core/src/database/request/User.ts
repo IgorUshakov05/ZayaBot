@@ -163,6 +163,31 @@ export const setTariff = async ({
   }
 };
 
+export const checkUserNotification = async ({
+  chat_id,
+}: {
+  chat_id: number;
+}): Promise<
+  | { success: false; message: string }
+  | { success: true; role: Role; mute: boolean }
+> => {
+  try {
+    const user = await User.findOne({ chat_id });
+
+    if (!user) {
+      return { success: false, message: "Пользователь не найден" };
+    }
+
+    return { success: true, role: user.role, mute: user.mute };
+  } catch (error) {
+    console.error("Ошибка при проверке уведомлений пользователя:", error);
+    return {
+      success: false,
+      message: "Произошла ошибка при проверке пользователя",
+    };
+  }
+};
+
 export const checkUserRole = async ({
   chat_id,
 }: {
