@@ -244,6 +244,7 @@ export async function get_data_company_and_director({
   | {
       success: true;
       chat_ids: { role: Role; chat_id: number }[];
+      count: number;
     }
   | {
       success: true;
@@ -273,6 +274,7 @@ export async function get_data_company_and_director({
       };
     }
 
+    const countApplication = company.applications.length;
     const chat_ids = users
       .filter((user) => user.mute === false)
       .map((user) => ({
@@ -285,7 +287,7 @@ export async function get_data_company_and_director({
       return { success: true, chat_id_director: director.chat_id, test: true };
     }
 
-    return { success: true, chat_ids };
+    return { success: true, chat_ids, count: countApplication };
   } catch (error) {
     console.error("Ошибка в get_data_company_and_director:", error);
     return {

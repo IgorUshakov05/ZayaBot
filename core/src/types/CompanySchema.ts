@@ -5,7 +5,7 @@ export interface ICompanySchema {
   title: string;
   domain: string;
   users: Types.ObjectId[];
-  applications?: Types.ObjectId[];
+  applications: Types.ObjectId[];
   api_key: string;
   test: boolean;
   createdAt: Date;

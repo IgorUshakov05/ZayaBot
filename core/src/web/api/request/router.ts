@@ -8,6 +8,8 @@ import { validateDomain } from "./validateRoute";
 import { get_data_company_and_director } from "../../../database/request/Company";
 import { sendMessageAllUsers } from "../../../bot/global/newRequest";
 import { sendTestMessage } from "../../../bot/global/testRequest";
+
+// Вот функция, нужно с ней дальше работать, это для работы с заявкой
 import { create_application } from "../../../database/request/Application";
 
 const requestRouter = Router();
@@ -85,7 +87,6 @@ requestRouter.post(
         domain: queryDomain,
       });
 
-      console.log(data);
       if (!data.success) {
         return res
           .status(400)
@@ -107,7 +108,9 @@ requestRouter.post(
         });
       }
       if ("chat_ids" in data && data.chat_ids) {
+        console.log(data.count)
         await sendMessageAllUsers({
+          count: data.count,
           users: data.chat_ids,
           data: {
             name,

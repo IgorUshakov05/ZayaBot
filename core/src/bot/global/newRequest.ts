@@ -8,68 +8,80 @@ import { Role } from "../../types/UserSchema";
  *
  * @param {Object} params
  * @param {{ chat_id: number; role: Role }[]} params.users - Список пользователей компании.
+ * @param {ApplicationData} params.data - Данные заявки.
  * @returns {Promise<{ success: boolean; message?: string }>}
  */
 export async function sendMessageAllUsers({
   users,
   data,
+  count,
 }: {
   users: { chat_id: number; role: Role }[];
   data: ApplicationData;
+  count: number;
 }): Promise<{ success: boolean; message?: string }> {
   if (!users || users.length === 0) {
     return { success: false, message: "Нет пользователей для уведомления." };
   }
 
-  const parts: string[] = [`🔔 <b>Заявка #1:</b>`];
+  const parts: string[] = [`🔔 <b>Заявка #${count+1}:</b>\n`];
 
   if (data.name) parts.push(`👤 Имя: ${data.name}`);
   if (data.phone) parts.push(`📞 Телефон: ${data.phone}`);
-  if (data.post) parts.push(`💼 Должность: ${data.post}`);
+  if (data.post) parts.push(`📧 Почта: ${data.post}`);
   if (data.address) parts.push(`🏢 Адрес: ${data.address}`);
+  if (data.company) parts.push(`💸 Адрес: ${data.company}`);
   if (data.message) parts.push(`💬 Сообщение: ${data.message}`);
   if (data.file) parts.push(`📎 Файл: В тестовом отсуствует`);
 
-  parts.push(
-    "",
-    `ℹ️ На бесплатном тарифе доступно 10 заявок в месяц.`,
-    `(Тестовая заявка не учитывается).`
-  );
-
   const message = parts.join("\n");
+
   try {
-    // Используем Promise.allSettled для безопасной рассылки
-    const results = await Promise.allSettled(
-      users.map(
-        (user, i) =>
-          new Promise(
-            (resolve) =>
-              setTimeout(async () => {
-                try {
-                  await bot.telegram.sendMessage(user.chat_id, message);
-                  resolve({ chat_id: user.chat_id, status: "sent" });
-                } catch (err) {
-                  console.error(
-                    `Ошибка отправки пользователю ${user.chat_id}:`,
-                    err
-                  );
-                  resolve({ chat_id: user.chat_id, status: "failed" });
-                }
-              }, i * 500) // чуть быстрее, чем 1000мс — оптимизация
-          )
+    const promises = users.map(
+      (user, i) =>
+        new Promise<{
+          chat_id: number;
+          status: "failed" | "sent";
+          message_id?: number;
+        }>((resolve) =>
+          setTimeout(async () => {
+            try {
+              const sentMessage = await bot.telegram.sendMessage(
+                user.chat_id,
+                message,
+                { parse_mode: "HTML" }
+              );
+              resolve({
+                chat_id: user.chat_id,
+                status: "sent",
+                message_id: sentMessage.message_id,
+              });
+            } catch (err) {
+              resolve({ chat_id: user.chat_id, status: "failed" });
+            }
+          }, i * 100)
+        )
+    );
+
+    const result = await Promise.allSettled(promises);
+    const fulfilled: { chat_id: number; message_id?: number }[] = result
+      .filter(
+        (
+          r
+        ): r is PromiseFulfilledResult<{
+          chat_id: number;
+          status: "failed" | "sent";
+          message_id?: number;
+        }> => r.status === "fulfilled"
       )
-    );
+      .map((item) => {
+        return {
+          chat_id: item.value.chat_id,
+          message_id: item.value.message_id,
+        };
+      });
 
-    const failed = results.filter(
-      (r) => r.status === "fulfilled" && (r.value as any).status === "failed"
-    );
-
-    if (failed.length > 0) {
-      return {
-        success: false,
-        message: `Не удалось отправить ${failed.length} пользователям.`,
-      };
-    }
+    console.log("Результаты рассылки:", fulfilled);
 
     return { success: true };
   } catch (error) {
