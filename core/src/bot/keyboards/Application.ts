@@ -12,4 +12,9 @@ export const applicationMurkup = {
       ["🏠 Главное меню"],
     ]).resize(true),
   },
+  newApplicationManager: {
+    ...Markup.inlineKeyboard([
+      { text: "✅ Взять в работу", callback_data: "" },
+    ]),
+  },
 };

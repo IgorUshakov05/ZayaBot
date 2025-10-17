@@ -7,8 +7,7 @@ const CompanySchema = new Schema<ICompanySchema>(
     domain: { type: String, unique: true },
     users: [{ type: Schema.Types.ObjectId, ref: "User" }], // ссылки на пользователей
     applications: [{ type: Schema.Types.ObjectId, ref: "Applications" }],
-    paid: { type: Boolean, default: false },
-  
+
     api_key: { type: String, required: true, default: () => uuid() },
     test: { type: Boolean, default: false },
   },

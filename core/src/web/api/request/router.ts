@@ -1,13 +1,14 @@
 import { Router, Request, Response } from "express";
 import multer from "multer";
 import path from "path";
-import { IApplicationRequest } from "../../../types/Application";
+import { ApplicationData } from "../../../types/Application";
 import { requestValidator } from "../../validator/request";
 import { validationResult } from "express-validator";
 import { validateDomain } from "./validateRoute";
 import { get_data_company_and_director } from "../../../database/request/Company";
 import { sendMessageAllUsers } from "../../../bot/global/newRequest";
 import { sendTestMessage } from "../../../bot/global/testRequest";
+import { create_application } from "../../../database/request/Application";
 
 const requestRouter = Router();
 
@@ -71,14 +72,8 @@ requestRouter.post(
           .json({ success: false, errors: validationErrors.array() });
       }
 
-      const {
-        name,
-        phone,
-        company,
-        post,
-        message,
-        address,
-      }: IApplicationRequest = req.body;
+      const { name, phone, company, post, message, address }: ApplicationData =
+        req.body;
 
       const uploadedFile = req.file;
 
@@ -101,10 +96,28 @@ requestRouter.post(
         await sendTestMessage({
           chat_id: data.chat_id_director,
           domain: queryDomain,
+          data: {
+            name,
+            phone,
+            company,
+            post,
+            message,
+            address,
+          },
         });
       }
       if ("chat_ids" in data && data.chat_ids) {
-        await sendMessageAllUsers({ users: data.chat_ids });
+        await sendMessageAllUsers({
+          users: data.chat_ids,
+          data: {
+            name,
+            phone,
+            company,
+            post,
+            message,
+            address,
+          },
+        });
       }
 
       return res.json({

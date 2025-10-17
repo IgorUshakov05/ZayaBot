@@ -1,7 +1,6 @@
 import { Payment } from "../schema/PaymentSchema";
 import { IPayment } from "../../types/PaymentShcema";
 import { User } from "../schema/UserSchema";
-import { v4 as uuidv4 } from "uuid";
 
 export const create_payment = async ({
   chat_id,

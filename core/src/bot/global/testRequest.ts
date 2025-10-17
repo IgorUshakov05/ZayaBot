@@ -1,37 +1,58 @@
 import bot from "..";
+import { ApplicationData } from "../../types/Application";
 import { Role } from "../../types/UserSchema";
 import { start } from "../keyboards/start";
 
 /**
- * Отправляет уведомление всем пользователям компании.
- * Сообщения различаются по роли (директор / менеджер).
+ * Отправляет тестовое уведомление директору с данными заявки.
  *
  * @param {Object} params
- * @param {{ chat_id: number; role: Role }[]} params.users - Список пользователей компании.
+ * @param {number} params.chat_id - ID чата директора.
+ * @param {string} params.domain - Домен компании.
+ * @param {Omit<IApplication, "createdAt" | "updatedAt">} params.data - Данные тестовой заявки.
  * @returns {Promise<{ success: boolean; message?: string }>}
  */
 export async function sendTestMessage({
   chat_id,
   domain,
+  data,
 }: {
   chat_id: number;
   domain: string;
+  data: ApplicationData;
 }): Promise<{ success: boolean; message?: string }> {
   if (!chat_id) {
     return { success: false, message: "Нет пользователей для уведомления." };
   }
 
-  const directorMessage = `🔔 Тестовая заявка успешно получена!
-Ваш домен ${domain} подтверждён. На бесплатном тарифе доступно 10 заявок в месяц (тестовая заявка не учитывается).`;
+  // Формируем тело сообщения с учётом существующих полей
+  const parts: string[] = [
+    `🔔 <b>Тестовая заявка успешно получена!</b>`,
+    `Ваш домен <b>${domain}</b> подтверждён.`,
+    "",
+    `📋 <b>Данные заявки:</b>`,
+  ];
+
+  if (data.name) parts.push(`👤 Имя: ${data.name}`);
+  if (data.phone) parts.push(`📞 Телефон: ${data.phone}`);
+  if (data.post) parts.push(`💼 Должность: ${data.post}`);
+  if (data.address) parts.push(`🏢 Адрес: ${data.address}`);
+  if (data.message) parts.push(`💬 Сообщение: ${data.message}`);
+  if (data.file) parts.push(`📎 Файл: В тестовом отсуствует`);
+
+  parts.push(
+    "",
+    `ℹ️ На бесплатном тарифе доступно 10 заявок в месяц.`,
+    `(Тестовая заявка не учитывается).`
+  );
+
+  const directorMessage = parts.join("\n");
 
   try {
-    // Используем Promise.allSettled для безопасной рассылки
-
-    await bot.telegram.sendMessage(
-      chat_id,
-      directorMessage,
-      start.auth.director
-    );
+    await bot.telegram.sendMessage(chat_id, directorMessage, {
+      parse_mode: "HTML",
+      ...start.auth.director,
+    });
 
     return { success: true };
   } catch (error) {

@@ -1,11 +1,8 @@
 import { Types } from "mongoose";
 
-
-
 export interface ICompanySchema {
   _id: Types.ObjectId;
   title: string;
-  paid:boolean;
   domain: string;
   users: Types.ObjectId[];
   applications?: Types.ObjectId[];
