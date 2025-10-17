@@ -17,7 +17,7 @@ router.post("/webhook/yookassa", async (req: Request, res: Response) => {
       let balanse = await upBalanceUser({
         chat_id: data.object.metadata.chat_id,
         amount: data.object.amount.value,
-        paymentType: data.object.metadata.paymentType,
+        paymentType:data.object.metadata.paymentType,
       });
       if (!balanse.success) {
         throw Error(balanse.message);

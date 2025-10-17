@@ -14,8 +14,7 @@ export default async function notificationMessageEvent(
   }
 
   // Используем userState.mute для определения состояния уведомлений
-  const keyboard = settingNotification(userState.mute, userState.role);
-
+  const keyboard = settingNotification(!userState.mute, userState.role);
   if (userState.role === Role.director || userState.role === Role.manager) {
     return ctx.reply(
       userState.mute

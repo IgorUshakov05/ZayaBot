@@ -188,6 +188,35 @@ export const checkUserNotification = async ({
   }
 };
 
+export const setUserNotification = async ({
+  chat_id,
+  state,
+}: {
+  chat_id: number;
+  state: boolean;
+}): Promise<
+  | { success: false; message: string }
+  | { success: true; role: Role; mute: boolean }
+> => {
+  try {
+    const user = await User.findOneAndUpdate(
+      { chat_id },
+      { $set: { mute: state } }
+    );
+
+    if (!user) {
+      return { success: false, message: "Пользователь не найден" };
+    }
+    return { success: true, role: user.role, mute: user.mute };
+  } catch (error) {
+    console.error("Ошибка при проверке уведомлений пользователя:", error);
+    return {
+      success: false,
+      message: "Произошла ошибка при проверке пользователя",
+    };
+  }
+};
+
 export const checkUserRole = async ({
   chat_id,
 }: {

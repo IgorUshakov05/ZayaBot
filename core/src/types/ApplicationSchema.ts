@@ -6,9 +6,10 @@ export enum Status {
   complete = "complete",
 }
 
+
 export default interface IApplication extends Document {
-  name: string;
-  phone: string;
+  name?: string;
+  phone?: string;
   status: Status;
   file?: string;
   company?: Types.ObjectId;

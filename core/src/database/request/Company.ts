@@ -9,7 +9,20 @@ interface CreateCompanyParams {
   user: { user_tag: string; chat_id: number; name: string };
   company: { title: string; domain: string };
 }
-
+/**
+ * Создаёт новую компанию и назначает пользователя директором.
+ *
+ * @param {Object} params.user - Данные пользователя.
+ * @param {string} params.user.user_tag - Уникальный идентификатор пользователя в Telegram.
+ * @param {number} params.user.chat_id - ID чата пользователя.
+ * @param {string} params.user.name - Имя пользователя.
+ * @param {Object} params.company - Данные компании.
+ * @param {string} params.company.title - Название компании.
+ * @param {string} params.company.domain - Уникальный домен компании.
+ *
+ * @returns {Promise<{success: boolean; message: string; company?: ICompanySchema; user?: any}>}
+ * Объект с результатом операции.
+ */
 export async function createCompanyAndUser({
   user,
   company,
@@ -76,6 +89,16 @@ export async function createCompanyAndUser({
   }
 }
 
+/**
+ * Проверяет, является ли пользователь директором и верифицирована ли его компания.
+ *
+ * @param {Object} params - Параметры проверки.
+ * @param {number} params.chat_id - Telegram chat ID пользователя.
+ * @param {string} params.messageSuccess - Сообщение, возвращаемое при успешной проверке.
+ *
+ * @returns {Promise<{success: boolean; message: string}>}
+ * Результат проверки с сообщением.
+ */
 export async function is_verefy_company_of_director({
   chat_id,
   messageSuccess,
@@ -136,6 +159,16 @@ export async function is_verefy_company_of_director({
   }
 }
 
+/**
+ * Удаляет компанию и всех связанных с ней пользователей.
+ *
+ * @param {Object} params - Параметры удаления.
+ * @param {number} params.chat_id - Telegram chat ID директора компании.
+ * @param {boolean} params.test - Флаг тестовой компании.
+ *
+ * @returns {Promise<{success: boolean; message: string}>}
+ * Результат операции удаления.
+ */
 export async function delete_company({
   chat_id,
   test,
@@ -183,6 +216,81 @@ export async function delete_company({
       success: false,
       message:
         "❌ Произошла ошибка при удалении компании. Пожалуйста, попробуйте позже.",
+    };
+  }
+}
+
+/**
+ * Получает данные о компании и её пользователях по API-ключу и домену.
+ * Возвращает chat_id всех активных пользователей и роль директора.
+ *
+ * @param {Object} params - Параметры запроса.
+ * @param {string} params.api_key - Уникальный API-ключ компании.
+ * @param {string} params.domain - Домен компании.
+ *
+ * @returns {Promise<
+ *   | { success: false; message: string }
+ *   | { success: true; chat_ids: { role: Role; chat_id: number }[] }
+ * >}
+ */
+export async function get_data_company_and_director({
+  api_key,
+  domain,
+}: {
+  api_key: string;
+  domain: string;
+}): Promise<
+  | { success: false; error_message?: string }
+  | {
+      success: true;
+      chat_ids: { role: Role; chat_id: number }[];
+    }
+  | {
+      success: true;
+      test: true;
+      chat_id_director: number;
+    }
+> {
+  try {
+    console.log(api_key, domain);
+    const company = await Company.findOne({ api_key, domain }).populate(
+      "users"
+    );
+
+    if (!company) {
+      return {
+        success: false,
+        error_message: "❌ Компании с указанными данными не существует.",
+      };
+    }
+
+    const users = company.users as unknown as IUser[];
+    const director = users.filter((user) => user.role === Role.director)[0];
+    if (!users || users.length === 0) {
+      return {
+        success: false,
+        error_message: "⚠️ У компании нет зарегистрированных пользователей.",
+      };
+    }
+
+    const chat_ids = users
+      .filter((user) => user.mute === false)
+      .map((user) => ({
+        chat_id: user.chat_id,
+        role: user.role,
+      }));
+    if (company.test === true) {
+      company.test = false;
+      await company.save();
+      return { success: true, chat_id_director: director.chat_id, test: true };
+    }
+
+    return { success: true, chat_ids };
+  } catch (error) {
+    console.error("Ошибка в get_data_company_and_director:", error);
+    return {
+      success: false,
+      error_message: "❗ Произошла ошибка при получении данных компании.",
     };
   }
 }
