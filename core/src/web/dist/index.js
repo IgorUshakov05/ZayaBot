@@ -1,10 +1,10 @@
 // Создаём FormData вручную
 const formData = new FormData();
 formData.append("name", "Иван Иванов");
-formData.append("phone", "+7 (999) 123-45-67");
-formData.append("post", "ivan@example.com");
-formData.append("company", "Моя Компания");
-formData.append("address", "г. Москва, ул. Ленина, д.1");
+formData.append("user_phone", "+7 (999) 123-45-67");
+formData.append("user_post", "ivan@example.com");
+formData.append("user_company", "Моя Компания");
+formData.append("user_address", "г. Москва, ул. Ленина, д.1");
 formData.append("message", "Это тестовое сообщение");
 
 const fileInput = document.querySelector('input[type="file"]');
@@ -20,7 +20,7 @@ const startResponse = async () => {
         headers: {
           'x-api-key': '5c705969-5c3a-4f6e-be47-8df800bff492'
         },
-        method: "POST",
+        method: "user_post",
         body: formData,
       }
     );

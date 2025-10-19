@@ -8,16 +8,19 @@ export enum Status {
 
 export default interface IApplication extends Document {
   name?: string;
-  phone?: string;
+  user_phone?: string;
   status: Status;
-  user_work: Types.ObjectId;
+  user_company?: string;
+  manager: Types.ObjectId;
   comment: string | null;
+  complite: boolean;
   file?: string;
+  count: number;
   chats: { chat_id: number; message_id: number }[];
-  company?: Types.ObjectId;
-  post?: string;
+  company: Types.ObjectId;
+  user_post?: string;
   message?: string;
-  address?: string;
+  user_address?: string;
   createdAt: Date;
   updatedAt: Date;
 }

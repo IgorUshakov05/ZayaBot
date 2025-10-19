@@ -1,16 +1,23 @@
+import conf from "../../config/config";
+import { getTariff } from "../../database/request/User";
+import { PaymentPlan, PaymentType } from "../../types/UserSchema";
+import { userTariff } from "../action/user.tariff";
 import command_start from "../command/start";
 import { analiticsMurkup } from "../keyboards/analitics";
-import { applicationMurkup } from "../keyboards/Application";
+import { applicationMurkup } from "../keyboards/application";
 import { managerMurkup } from "../keyboards/managers";
-import { settingNotification } from "../keyboards/notification";
 import { subscribeMurkap } from "../keyboards/subscribe";
 import newManager from "./addManager";
 import notificationMessageEvent from "./notification";
+import { replyMessag } from "./onReply";
 
 // Обработчик сообщений
 const messageHandle = async (ctx: any) => {
   const text = ctx.message.text;
-
+  const reply_message = ctx.message?.reply_to_message;
+  if (!!reply_message) {
+    return await replyMessag(ctx);
+  }
   if (!text) return;
 
   switch (text) {
@@ -23,40 +30,88 @@ const messageHandle = async (ctx: any) => {
       break;
 
     case "💰 Подписка":
-      ctx.reply(
-        `💰 Текущий тариф: Бесплатный  
-(10 заявок/месяц, до 10.10.2025)
+      let user_tariff = await getTariff({ chat_id: ctx.chat.id });
+      if (!user_tariff.success) return ctx.reply(user_tariff.message);
+      let user_pay = userTariff({
+        payment_plan: user_tariff.payment_plan,
+        payment_type: user_tariff.payment_type,
+      });
 
-📦 Доступные тарифы:
+      await ctx.reply(
+        `💰 <b>Текущий тариф: ${user_pay.title}</b>
+📅 Действует до: 10.10.2025
+📊 Лимит: ${
+          user_tariff.payment_type === PaymentType.PER_REQUEST
+            ? `Заявка / ${conf.PRICE_PER_REQUEST}₽`
+            : `${user_pay.limit} заявок/месяц`
+        }
 
-1️⃣ Start — включает: Имя, Телефон  
-2️⃣ Pro — включает: +Компания, Почта, Файл  
-3️⃣ Enterprise — включает: +Адрес, Комментарий, Расширенная аналитика
+🎯 <b>Доступные поля:</b>
+${user_pay.allowedFields.map((item) => `✓ ${item}`).join("\n")}
+👥 ${user_pay.managers} менеджер(ов) в системе
 
-💸 Плата за заявку: 10 руб. / заявка  
-Вы оплачиваете только поступившие заявки — без фиксированных лимитов и подписок.
+📦 <b>Доступные тарифы:</b>
 
-✨ Попробуйте сейчас: пополните счёт на 100 руб. и получите 10 заявок.
-Мы заранее уведомим, когда баланс будет подходить к концу.
-`,
-        subscribeMurkap.first
+1️⃣ <b>Free</b> - 0₽/мес
+• 10 заявок в месяц
+• Имя, Телефон
+• 1 менеджер
+
+2️⃣ <b>Start</b> - 199₽/мес
+• 50 заявок в месяц
+• <b>Free +</b> Почта, Адрес, Комментарий, Компания
+• До 5 менеджеров
+
+3️⃣ <b>Pro</b> - 499₽/мес
+• 100 заявок в месяц  
+• <b>Start +</b> Загрузка файлов
+• До 10 менеджеров
+
+4️⃣ <b>Enterprise</b> - 1499₽/мес
+• Безлимитные заявки
+• Все функции Pro
+• Приоритетная поддержка
+• Неограниченно менеджеров
+
+💸 <b>Альтернатива:</b> Оплата за заявку
+• ${conf.PRICE_PER_REQUEST} руб. / заявка
+• Без фиксированных лимитов и подписок
+• Только за поступившие заявки
+
+✨ <b>Попробуйте сейчас:</b> Пополните счёт на 100 руб. и получите 10 заявок.
+Мы заранее уведомим, когда баланс будет подходить к концу.`,
+        { parse_mode: "HTML", ...subscribeMurkap.first }
       );
       break;
 
     case "📋 Тариф":
       ctx.reply(
-        `💰 *Текущий тариф:* Бесплатный  
-(10 заявок/месяц, до 10.10.2025)
+        `
+📦 <b>Доступные тарифы:</b>
 
-📦 *Доступные тарифы:*
-1️⃣ *Start — 0₽* — включает: Имя, Телефон  
-2️⃣ *Pro — 499₽* — включает: +Компания, Почта, Файл  
-3️⃣ *Enterprise — 1499₽* — включает: +Адрес, Комментарий, Расширенная аналитика
-`,
-        { parse_mode: "Markdown", ...subscribeMurkap.subscribe }
+1️⃣ <b>Free</b> - 0₽
+• Имя, Телефон
+• 10 заявок/мес
+• 1 менеджер
+
+2️⃣ <b>Start</b> - 199₽
+• <b>Free +</b> Почта, Адрес, Комментарий, Компания  
+• 50 заявок/мес
+• До 5 менеджеров
+
+3️⃣ <b>Pro</b> - 499₽
+• <b>Start +</b> Загрузка файлов
+• 100 заявок/мес
+• До 10 менеджеров
+
+4️⃣ <b>Enterprise</b> - 1499₽
+• Все поля и функции
+• Безлимитные заявки
+• Неограниченно менеджеров
+• Приоритетная поддержка`,
+        { parse_mode: "HTML", ...subscribeMurkap.subscribe }
       );
       break;
-
     case "➕ Добавить менеджера":
       newManager(ctx);
       break;
@@ -65,7 +120,7 @@ const messageHandle = async (ctx: any) => {
       ctx.reply(
         `💸 *Плата за заявку*
 
-📈 *Стоимость:* 10 руб. / заявка  
+📈 *Стоимость:* ${conf.PRICE_PER_REQUEST} руб. / заявка  
 Вы оплачиваете *только поступившие заявки* — без фиксированных лимитов и подписок.  
 
 ✨ *Попробуйте сейчас:* пополните счёт на *100 руб.* и получите *10 заявок*.  

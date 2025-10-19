@@ -17,6 +17,8 @@ import topupBalance from "./action/topup_balance";
 import tariffBalance from "./action/tariff";
 import toggleTariffWizard from "./scenes/tariff";
 import notificationAction from "./action/notification";
+import inWork from "./action/inWork.application";
+import { REPL_MODE_SLOPPY } from "repl";
 
 // Типизация контекста для Wizard
 type MyContext = Scenes.WizardContext;
@@ -37,7 +39,7 @@ bot.action("remove_test_company", removeTextCompany);
 bot.action("topup_balance", topupBalance);
 bot.action(/^tariff_(.+)$/, tariffBalance);
 bot.action(/^notification_(off|on)$/, notificationAction);
-
+bot.action(/^inwork_(\d+)/, inWork as any);
 
 bot.on("text", messageHandle);
 export default bot;

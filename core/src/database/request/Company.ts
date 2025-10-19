@@ -3,7 +3,8 @@ import { Types } from "mongoose";
 import { User } from "../schema/UserSchema";
 import { v4 as uuidv4 } from "uuid";
 import { ICompanySchema } from "../../types/CompanySchema";
-import IUser, { Role } from "../../types/UserSchema";
+import IUser, { PaymentPlan, PaymentType, Role } from "../../types/UserSchema";
+import IApplication from "../../types/ApplicationSchema";
 
 interface CreateCompanyParams {
   user: { user_tag: string; chat_id: number; name: string };
@@ -202,7 +203,6 @@ export async function delete_company({
     }
 
     const company = findUser.company as any;
-    console.log(company);
     await User.deleteMany({ company: company._id });
     await Company.deleteOne({ _id: company._id, test });
 
@@ -245,6 +245,12 @@ export async function get_data_company_and_director({
       success: true;
       chat_ids: { role: Role; chat_id: number }[];
       count: number;
+
+      payment_type: PaymentType;
+      payment_plan: PaymentPlan;
+      countApplicationInMounth: number;
+      chat_id_director: number;
+      balance: number;
     }
   | {
       success: true;
@@ -253,10 +259,10 @@ export async function get_data_company_and_director({
     }
 > {
   try {
-    console.log(api_key, domain);
-    const company = await Company.findOne({ api_key, domain }).populate(
-      "users"
-    );
+    const company = await Company.findOne({ api_key, domain }).populate([
+      "users",
+      "applications",
+    ]);
 
     if (!company) {
       return {
@@ -264,7 +270,6 @@ export async function get_data_company_and_director({
         error_message: "❌ Компании с указанными данными не существует.",
       };
     }
-
     const users = company.users as unknown as IUser[];
     const director = users.filter((user) => user.role === Role.director)[0];
     if (!users || users.length === 0) {
@@ -273,8 +278,13 @@ export async function get_data_company_and_director({
         error_message: "⚠️ У компании нет зарегистрированных пользователей.",
       };
     }
+    const applications = company.applications as unknown as IApplication[];
+    const countApplication = applications.length;
 
-    const countApplication = company.applications.length;
+    const countApplicationInMounth = applications.filter(
+      (app) => new Date(app.createdAt).getMonth() === new Date().getMonth()
+    ).length;
+
     const chat_ids = users
       .filter((user) => user.mute === false)
       .map((user) => ({
@@ -287,7 +297,16 @@ export async function get_data_company_and_director({
       return { success: true, chat_id_director: director.chat_id, test: true };
     }
 
-    return { success: true, chat_ids, count: countApplication };
+    return {
+      success: true,
+      chat_ids,
+      count: countApplication,
+      balance: director.balance,
+      chat_id_director: director.chat_id,
+      payment_plan: director.payment_plan,
+      payment_type: director.payment_type,
+      countApplicationInMounth,
+    };
   } catch (error) {
     console.error("Ошибка в get_data_company_and_director:", error);
     return {

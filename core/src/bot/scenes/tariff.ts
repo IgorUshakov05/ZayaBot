@@ -36,7 +36,7 @@ const toggleTariffWizard = new Scenes.WizardScene<MyContext>(
     if (await cancelMiddleware(ctx)) return;
 
     let plan: PaymentPlan = ctx.scene.state.plan;
-    if (plan === "START") {
+    if (plan === "FREE") {
       return ctx.scene.leave();
     }
     const { success, payment, message } = await create_pay(

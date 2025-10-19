@@ -1,4 +1,4 @@
-import { PaymentType, Role } from "./../../types/UserSchema";
+import { PaymentPlan, PaymentType, Role } from "./../../types/UserSchema";
 import { ICompanySchema } from "../../types/CompanySchema";
 import { Code } from "../schema/CodeSchema";
 import { User } from "../schema/UserSchema";
@@ -11,14 +11,14 @@ export const createCode = async ({
   role: Role;
 }): Promise<{ success: boolean; message: string; code?: string }> => {
   try {
-    const user = await User.findOne({ chat_id }).populate<{
+    const user = await User.findOne({ chat_id, role: Role.director }).populate<{
       company: ICompanySchema;
     }>("company");
 
     if (!user) {
       return {
         success: false,
-        message: "❌ А вы кто?",
+        message: "⚠️ Вы не являетесь директором компании.",
       };
     }
 
@@ -39,7 +39,8 @@ export const createCode = async ({
     }
 
     if (
-      user.payment_type === PaymentType.FREE &&
+      user.payment_type === PaymentType.SUBSCRIPTION &&
+      user.payment_plan === PaymentPlan.FREE &&
       user.company.users.length >= 2
     ) {
       return {

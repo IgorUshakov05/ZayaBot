@@ -5,17 +5,18 @@ export enum Role {
   director = "director",
 }
 export enum PaymentType {
-  PER_REQUEST = "PerRequest", // Короче это если за заявку
-  SUBSCRIPTION = "Subscription", // Это тариф который ниже
-  FREE = "Free", // Ну а это дефолтик друзья
+  PER_REQUEST = "PerRequest", 
+  SUBSCRIPTION = "Subscription", 
 }
 export enum PaymentPlan {
+  FREE = "FREE",
   START = "START",
   PRO = "PRO",
   ENTERPRISE = "ENTERPRISE",
 }
 export const PricePlan: Record<PaymentPlan, number> = {
-  [PaymentPlan.START]: 0,
+  [PaymentPlan.FREE]: 0,
+  [PaymentPlan.START]: 199,
   [PaymentPlan.PRO]: 499,
   [PaymentPlan.ENTERPRISE]: 1499,
 };
@@ -27,8 +28,8 @@ export default interface IUser extends Document {
   balance: number;
   mute: boolean;
   chat_id: number;
-  payment_type: "PerRequest" | "Subscription" | "Free";
-  payment_plan?: PaymentPlan;
+  payment_type: PaymentType;
+  payment_plan: PaymentPlan;
   mail?: null | string;
   payment_method?: Types.ObjectId;
   company: Types.ObjectId;

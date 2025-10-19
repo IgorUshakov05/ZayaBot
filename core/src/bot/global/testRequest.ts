@@ -34,9 +34,9 @@ export async function sendTestMessage({
   ];
 
   if (data.name) parts.push(`👤 Имя: ${data.name}`);
-  if (data.phone) parts.push(`📞 Телефон: ${data.phone}`);
-  if (data.post) parts.push(`💼 Должность: ${data.post}`);
-  if (data.address) parts.push(`🏢 Адрес: ${data.address}`);
+  if (data.user_phone) parts.push(`📞 Телефон: ${data.user_phone}`);
+  if (data.user_post) parts.push(`💼 Должность: ${data.user_post}`);
+  if (data.user_address) parts.push(`🏢 Адрес: ${data.user_address}`);
   if (data.message) parts.push(`💬 Сообщение: ${data.message}`);
   if (data.file) parts.push(`📎 Файл: В тестовом отсуствует`);
 

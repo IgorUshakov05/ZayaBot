@@ -163,6 +163,35 @@ export const setTariff = async ({
   }
 };
 
+export const getTariff = async ({
+  chat_id,
+}: {
+  chat_id: number;
+}): Promise<
+  | { success: true; payment_plan: PaymentPlan; payment_type: PaymentType }
+  | { success: false; message: string }
+> => {
+  try {
+    const user = await User.findOne({ chat_id });
+
+    if (!user) {
+      return { success: false, message: "Пользователь не найден" };
+    }
+
+    return {
+      success: true,
+      payment_plan: user.payment_plan,
+      payment_type: user.payment_type,
+    };
+  } catch (error) {
+    console.error("Ошибка при установке тарифа:", error);
+    return {
+      success: false,
+      message: "❌ Ошибка сервера при установке тарифа",
+    };
+  }
+};
+
 export const checkUserNotification = async ({
   chat_id,
 }: {

@@ -1,11 +1,9 @@
 export type ApplicationData = {
   name?: string;
-  phone?: string;
-  // status?: status;
+  user_phone?: string;
   file?: string;
-  // company?: Types.ObjectId;
-  post?: string;
+  user_post?: string;
+  user_company?:string,
   message?: string;
-  company?: string;
-  address?: string;
+  user_address?: string;
 };

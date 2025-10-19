@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import IUser from "../../types/UserSchema";
+import IUser, { PaymentPlan, PaymentType } from "../../types/UserSchema";
 
 const UserSchema = new Schema<IUser>(
   {
@@ -16,8 +16,13 @@ const UserSchema = new Schema<IUser>(
     },
     payment_type: {
       type: String,
-      enum: ["PerRequest", "Subscription", "Free"],
-      default: "Free",
+      enum: ["PerRequest", "Subscription"],
+      default: PaymentType.SUBSCRIPTION,
+    },
+    payment_plan: {
+      type: String,
+      enum: ["FREE", "START", "PRO", "ENTERPRISE"],
+      default: PaymentPlan.FREE,
     },
     balance: {
       type: Number,
@@ -43,10 +48,7 @@ const UserSchema = new Schema<IUser>(
       required: true,
       unique: true,
     },
-    payment_plan: {
-      type: String,
-      enum: ["START", "PRO", "ENTERPRISE"],
-    },
+
     mail: {
       type: String,
       required: false,

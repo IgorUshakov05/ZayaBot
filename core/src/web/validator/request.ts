@@ -8,7 +8,7 @@ export const requestValidator = [
     .isLength({ max: 20 })
     .withMessage("Имя не должно превышать 20 символов"),
 
-  body("phone")
+  body("user_phone")
     .optional()
     .isString()
     .withMessage("Телефон должен быть строкой")
@@ -17,7 +17,7 @@ export const requestValidator = [
     .matches(/^[0-9+\-() ]*$/)
     .withMessage("Телефон содержит недопустимые символы"),
 
-  body("post")
+  body("user_post")
     .optional()
     .isEmail()
     .withMessage("Почта должна быть корректным email"),
@@ -29,7 +29,7 @@ export const requestValidator = [
     .isLength({ max: 30 })
     .withMessage("Название компании не должно превышать 30 символов"),
 
-  body("address")
+  body("user_address")
     .optional()
     .isString()
     .withMessage("Адрес должен быть строкой")

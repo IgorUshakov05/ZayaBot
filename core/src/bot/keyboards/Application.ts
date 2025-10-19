@@ -12,9 +12,33 @@ export const applicationMurkup = {
       ["🏠 Главное меню"],
     ]).resize(true),
   },
-  newApplicationManager: {
-    ...Markup.inlineKeyboard([
-      { text: "✅ Взять в работу", callback_data: "" },
-    ]),
-  },
+};
+
+export const applicationManageMurkap = (message_id: number) => {
+  return {
+    newApplicationManager: {
+      ...Markup.inlineKeyboard([
+        {
+          text: "🔄 Взять в работу",
+          callback_data: `inwork_${message_id}`,
+        },
+      ]),
+    },
+    inWorkForManager: {
+      ...Markup.inlineKeyboard([
+        [
+          {
+            text: "✅ Завершить заявку",
+            callback_data: `finish_${message_id}`,
+          },
+        ],
+        [
+          {
+            text: "🚫 Отказаться от заявки",
+            callback_data: `cancel_${message_id}`,
+          },
+        ],
+      ]),
+    },
+  };
 };

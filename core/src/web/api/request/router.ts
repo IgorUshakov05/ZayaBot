@@ -11,6 +11,8 @@ import { sendTestMessage } from "../../../bot/global/testRequest";
 
 // Вот функция, нужно с ней дальше работать, это для работы с заявкой
 import { create_application } from "../../../database/request/Application";
+import { checkTariff } from "../../validator/checkTariff";
+import { sendMessageTarriffError } from "../../../bot/global/messageTariffError";
 
 const requestRouter = Router();
 
@@ -63,9 +65,6 @@ requestRouter.post(
         });
       }
       console.log("CORS origin:", requestDomain);
-      console.log("Query domain:", req.query.domain);
-
-      console.log("API Key: ", api_key);
 
       const validationErrors = validationResult(req);
       if (!validationErrors.isEmpty()) {
@@ -74,13 +73,16 @@ requestRouter.post(
           .json({ success: false, errors: validationErrors.array() });
       }
 
-      const { name, phone, company, post, message, address }: ApplicationData =
-        req.body;
+      const {
+        name,
+        user_phone,
+        user_company,
+        user_post,
+        message,
+        user_address,
+      }: ApplicationData = req.body;
 
       const uploadedFile = req.file;
-
-      console.log("Request body:", req.body);
-      console.log("Uploaded file:", uploadedFile);
 
       let data = await get_data_company_and_director({
         api_key,
@@ -99,31 +101,67 @@ requestRouter.post(
           domain: queryDomain,
           data: {
             name,
-            phone,
-            company,
-            post,
+            user_phone,
+            user_company,
+            user_post,
             message,
-            address,
+            user_address,
           },
         });
       }
       if ("chat_ids" in data && data.chat_ids) {
-        console.log(data.count)
-        await sendMessageAllUsers({
+        let check_tariff = await checkTariff({
+          application: {
+            name,
+            user_phone,
+            user_company,
+            user_post,
+            message,
+            user_address,
+          },
+          balance: data.balance,
+          countApplicationInMounth: data.countApplicationInMounth,
+          payment_plan: data.payment_plan,
+          payment_type: data.payment_type,
+        });
+
+        if (!check_tariff.success) {
+          await sendMessageTarriffError({
+            chat_id_director: data.chat_id_director,
+            message: check_tariff.message,
+          });
+          return res.json({
+            success: false,
+            message: "Обновите тарифный план!",
+          });
+        }
+        let send_message = await sendMessageAllUsers({
           count: data.count,
           users: data.chat_ids,
-          data: {
-            name,
-            phone,
-            company,
-            post,
-            message,
-            address,
-          },
+          data: check_tariff.filtredApplication,
         });
+
+        if (!send_message.success) {
+          return res.status(500).json({
+            success: false,
+            message: send_message.message,
+          });
+        }
+        let save_application_with_chat_ids = await create_application({
+          api_key,
+          count: data.count + 1,
+          chat_data: send_message.chat_data,
+          data: check_tariff.filtredApplication,
+        });
+        if (!save_application_with_chat_ids.success) {
+          return res.status(500).json({
+            success: false,
+            message: "Ошибка рассылке заявки",
+          });
+        }
       }
 
-      return res.json({
+      return res.status(201).json({
         success: true,
         message: "Успех!",
       });
