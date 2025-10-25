@@ -4,7 +4,8 @@ import { Role } from "../../types/UserSchema";
 import { Application } from "../schema/ApplicationSchema";
 import { Company } from "../schema/CompanySchema";
 import { User } from "../schema/UserSchema";
-import IApplication from "../../types/ApplicationSchema";
+import IApplication, { Status } from "../../types/ApplicationSchema";
+import app from "../../web";
 
 /**
  * Создаёт новую заявку и связывает её с компанией по api_key.
@@ -67,7 +68,7 @@ export async function create_application({
  * // Ошибки
  * { success: false, message: "❌ Заявка не найдена!" }
  */
-export async function in_work({
+export async function in_work_application({
   chat_id,
   message_id,
 }: {
@@ -135,8 +136,24 @@ export async function in_work({
         message:
           "👨‍💼 Директор не работает с заявками!\n\nРоль директора не позволяет брать заявки в работу.\nОбратитесь к менеджерам вашей компании.",
       };
+    let together_application_user = await Application.findOne({
+      manager: user._id,
+      status: Status.inWork,
+    });
+
+    if (together_application_user) {
+      return {
+        success: false,
+        message: `
+⚠️ <b>Невозможно взять новую заявку!</b>
+
+Завершите текущую заявку:<b> #${together_application_user.count}</b>
+`,
+      };
+    }
 
     application.manager = user._id as Types.ObjectId;
+    application.status = Status.inWork;
     await application.save();
 
     return {
@@ -155,7 +172,7 @@ export async function in_work({
   }
 }
 
-export async function add_comment({
+export async function add_comment_application({
   chat_id,
   message_id,
   comment,
@@ -182,13 +199,11 @@ export async function add_comment({
           "📝 Комментарий не может быть пустым!\n\nПожалуйста, введите текст комментария.",
       };
     }
-
     // Ищем заявку
     let application = await Application.findOne({
       "chats.chat_id": chat_id,
       "chats.message_id": message_id,
     });
-
     if (!application) {
       return {
         success: false,
@@ -211,7 +226,6 @@ export async function add_comment({
       };
     }
 
-    // Проверяем принадлежность к компании
     if (!user.company.equals(application.company)) {
       return {
         success: false,
@@ -237,9 +251,7 @@ export async function add_comment({
           "✅ Заявка уже выполнена!\n\nНельзя добавлять комментарии к завершенной заявке.",
       };
     }
-
-    // Проверяем, что пользователь - менеджер заявки
-    if (!application.manager === user._id) {
+    if (String(application.manager) !== String(user._id)) {
       return {
         success: false,
         message:
@@ -273,6 +285,143 @@ export async function add_comment({
       success: false,
       message:
         "🚨 Внутренняя ошибка сервера!\n\nПожалуйста, попробуйте позже или обратитесь в техническую поддержку.",
+    };
+  }
+}
+
+/**
+ * Отмена заявки менеджером
+ * @param chat_id - ID чата пользователя
+ * @param message_id - ID сообщения заявки
+ */
+export async function cancel_application({
+  chat_id,
+  message_id,
+}: {
+  chat_id: number;
+  message_id: number;
+}): Promise<
+  | { success: false; message: string }
+  | {
+      success: true;
+      message: string;
+      application: IApplication;
+      tag: string;
+      fullname: string;
+    }
+> {
+  try {
+    // 🔍 Находим заявку по chat_id и message_id
+    const application = await Application.findOne({
+      "chats.chat_id": chat_id,
+      "chats.message_id": message_id,
+    });
+
+    if (!application) {
+      return {
+        success: false,
+        message: `
+❌ <b>Заявка не найдена!</b>
+
+Возможные причины:
+• Сообщение было удалено  
+• Заявка уже обработана  
+• Ошибка идентификации
+`,
+      };
+    }
+
+    // 🔍 Находим пользователя
+    const user = await User.findOne({
+      company: application.company,
+      chat_id,
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        message: `
+🚫 <b>Доступ запрещён!</b>
+
+Вы не можете отменить эту заявку.  
+Возможно, вы больше не связаны с компанией.
+`,
+      };
+    }
+
+    // 🔒 Проверка компании
+    if (!user.company.equals(application.company)) {
+      return {
+        success: false,
+        message: `
+🏢 <b>Заявка принадлежит другой компании!</b>
+
+Обратитесь к администратору для уточнения.
+`,
+      };
+    }
+
+    // 👔 Проверка роли
+    if (user.role === Role.director) {
+      return {
+        success: false,
+        message: `
+👨‍💼 <b>Директор не может отменять заявки!</b>
+
+Эта функция доступна только менеджерам компании.
+`,
+      };
+    }
+
+    // 🧾 Проверка статуса
+    if (application.complite) {
+      return {
+        success: false,
+        message: `
+✅ <b>Заявка уже выполнена!</b>
+
+Нельзя отменить завершённую заявку.
+`,
+      };
+    }
+
+    // 🧑‍💼 Проверка, кто менеджер
+    if (String(application.manager) !== String(user._id)) {
+      return {
+        success: false,
+        message: `
+🚫 <b>Вы не можете отменить эту заявку!</b>
+
+Только менеджер, взявший заявку в работу, может её отменить.
+`,
+      };
+    }
+
+    // 🔧 Отмена заявки
+    application.status = Status.pending;
+    application.manager = null as any;
+    await application.save();
+
+    return {
+      success: true,
+      application,
+      message: `
+🔄 <b>Заявка №${application.count} успешно отменена!</b>
+
+Она возвращена в общий список и доступна для других менеджеров.
+`,
+      tag: user.user_tag,
+      fullname: `${user.name} ${user.surname || ""}`.trim(),
+    };
+  } catch (error) {
+    console.error("🚨 Ошибка в cancel_application:", error);
+    return {
+      success: false,
+      message: `
+🚨 <b>Внутренняя ошибка сервера!</b>
+
+Пожалуйста, попробуйте позже или обратитесь в техническую поддержку.
+`,
     };
   }
 }

@@ -23,6 +23,7 @@ export default async function newManager(
       { parse_mode: "Markdown" }
     );
   } catch (error) {
+    console.error(error);
     return ctx.reply("Ошибка сервера!", managerMurkup.errorAddManager);
   }
 }

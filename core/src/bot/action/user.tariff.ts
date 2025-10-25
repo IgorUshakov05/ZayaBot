@@ -13,7 +13,7 @@ export const TARIFF_CONFIG = {
       "Компания",
       "Файл",
     ],
-    managers: 10,
+    managers: 1,
   },
   [PaymentPlan.FREE]: {
     limit: 10,

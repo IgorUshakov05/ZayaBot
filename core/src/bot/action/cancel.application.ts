@@ -1,11 +1,13 @@
 import { Context } from "telegraf";
-import {  in_work_application } from "../../database/request/Application";
+import { cancel_application } from "../../database/request/Application";
 import { applicationManageMurkap } from "../keyboards/application";
 import { buildManagerMessage } from "../global/buildManagerMessage";
+import { Role } from "../../types/UserSchema";
 
-const inWork = async (ctx: Context & { match: RegExpMatchArray }) => {
+const cancelApplication = async (
+  ctx: Context & { match: RegExpMatchArray }
+) => {
   try {
-    // Сразу отвечаем на callback query
     await ctx.answerCbQuery("🔄 Обрабатываю запрос...");
 
     const message_id = parseInt(ctx.match[1]);
@@ -17,18 +19,21 @@ const inWork = async (ctx: Context & { match: RegExpMatchArray }) => {
       return;
     }
 
-    const run = await in_work_application({ chat_id: chat_id_manager, message_id });
+    const cancel = await cancel_application({
+      chat_id: chat_id_manager,
+      message_id,
+    });
 
-    if (!run.success) {
-      await ctx.reply(run.message, { parse_mode: "HTML" });
+    if (!cancel.success) {
+      await ctx.reply(cancel.message, { parse_mode: "HTML" });
       return;
     }
 
-    let new_message = buildManagerMessage(run.application);
-    new_message += "\n<i>Ответьте на сообщение чтобы оставить комментарий</i>";
-    for (const { chat_id, message_id } of run.application.chats) {
+    let new_message = buildManagerMessage(cancel.application);
+
+    for (const { chat_id, message_id, role } of cancel.application.chats) {
       try {
-        if (chat_id_manager === chat_id) {
+        if (role === Role.manager) {
           await ctx.telegram.editMessageText(
             chat_id,
             message_id,
@@ -36,23 +41,21 @@ const inWork = async (ctx: Context & { match: RegExpMatchArray }) => {
             new_message,
             {
               parse_mode: "HTML",
-              ...applicationManageMurkap(message_id).inWorkForManager,
+              ...applicationManageMurkap(message_id).newApplicationManager,
             }
           );
         } else {
+          message_id + "\nЗаявка из возврата";
           await ctx.telegram.editMessageText(
             chat_id,
             message_id,
             undefined,
-            `🔄 <b>Заявка #${run.application.count}</b>\n\n` +
-              `👨‍💼 Взял в работу менеджер <b><a href="https://t.me/${run.tag}">${run.fullname}</a></b>\n`,
+            new_message,
             {
               parse_mode: "HTML",
-              link_preview_options: { is_disabled: true },
             }
           );
         }
-
         await new Promise((resolve) => setTimeout(resolve, 250));
       } catch (error) {
         console.error(
@@ -63,14 +66,14 @@ const inWork = async (ctx: Context & { match: RegExpMatchArray }) => {
     }
 
     await ctx.answerCbQuery(
-      `✅ Заявка #${run.application.count} взята в работу!`
+      `✅ Заявка #${cancel.application.count} взята в работу!`
     );
   } catch (error: any) {
     if (
       error?.response?.error_code === 400 &&
       error?.response?.description?.includes("query is too old")
     ) {
-      console.error("⚠️ Игнорируем устаревший callback query");
+      console.log("⚠️ Игнорируем устаревший callback query");
       return;
     }
 
@@ -86,4 +89,4 @@ const inWork = async (ctx: Context & { match: RegExpMatchArray }) => {
   }
 };
 
-export default inWork;
+export default cancelApplication;

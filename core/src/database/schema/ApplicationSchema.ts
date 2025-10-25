@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import IApplication, { Status } from "../../types/ApplicationSchema";
+import { Role } from "../../types/UserSchema";
 
 const ApplicationSchema = new Schema<IApplication>(
   {
@@ -26,6 +27,10 @@ const ApplicationSchema = new Schema<IApplication>(
     chats: [
       {
         chat_id: { type: Number, required: true },
+        role: {
+          type: String,
+          enum: Object.values(Role),
+        },
         message_id: { type: Number, required: true },
       },
     ],

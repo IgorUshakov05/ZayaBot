@@ -19,6 +19,7 @@ import toggleTariffWizard from "./scenes/tariff";
 import notificationAction from "./action/notification";
 import inWork from "./action/inWork.application";
 import { REPL_MODE_SLOPPY } from "repl";
+import cancelApplication from "./action/cancel.application";
 
 // Типизация контекста для Wizard
 type MyContext = Scenes.WizardContext;
@@ -40,6 +41,7 @@ bot.action("topup_balance", topupBalance);
 bot.action(/^tariff_(.+)$/, tariffBalance);
 bot.action(/^notification_(off|on)$/, notificationAction);
 bot.action(/^inwork_(\d+)/, inWork as any);
+bot.action(/^cancel_(\d+)/, cancelApplication);
 
 bot.on("text", messageHandle);
 export default bot;

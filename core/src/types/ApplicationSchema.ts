@@ -1,4 +1,5 @@
 import { Document, Types } from "mongoose";
+import { Role } from "./UserSchema";
 
 export enum Status {
   pending = "pending",
@@ -16,7 +17,7 @@ export default interface IApplication extends Document {
   complite: boolean;
   file?: string;
   count: number;
-  chats: { chat_id: number; message_id: number }[];
+  chats: { chat_id: number; message_id: number, role: Role }[];
   company: Types.ObjectId;
   user_post?: string;
   message?: string;

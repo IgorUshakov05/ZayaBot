@@ -1,8 +1,8 @@
-import { PaymentPlan, PaymentType, Role } from "./../../types/UserSchema";
+import { PaymentType, Role } from "./../../types/UserSchema";
 import { ICompanySchema } from "../../types/CompanySchema";
 import { Code } from "../schema/CodeSchema";
 import { User } from "../schema/UserSchema";
-
+import { TARIFF_CONFIG } from "../../bot/action/user.tariff";
 export const createCode = async ({
   chat_id,
   role,
@@ -37,17 +37,21 @@ export const createCode = async ({
 Для генерации кода используйте рабочую компанию.`,
       };
     }
-
-    if (
-      user.payment_type === PaymentType.SUBSCRIPTION &&
-      user.payment_plan === PaymentPlan.FREE &&
-      user.company.users.length >= 2
-    ) {
-      return {
-        success: false,
-        message: `⚠️ По вашему тарифному плану нельзя добавить более одного менеджера. 
+    let userCurrentTariff =
+      TARIFF_CONFIG[
+        (user.payment_type === PaymentType.PER_REQUEST
+          ? PaymentType.PER_REQUEST
+          : user.payment_plan) as keyof typeof TARIFF_CONFIG
+      ];
+    console.log(userCurrentTariff);
+    if (userCurrentTariff.managers !== "Неограничено") {
+      if (userCurrentTariff.managers < user.company.users.length) {
+        return {
+          success: false,
+          message: `⚠️ По вашему тарифному плану нельзя добавить более одного менеджера. 
 Для подключения дополнительных сотрудников обновите тарифный план.`,
-      };
+        };
+      }
     }
     const newCode = new Code({
       role,

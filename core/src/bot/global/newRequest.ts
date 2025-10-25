@@ -3,6 +3,8 @@ import bot from "..";
 import { ApplicationData } from "../../types/Application";
 import { Role } from "../../types/UserSchema";
 import { applicationManageMurkap } from "../keyboards/application";
+import { buildManagerMessage } from "./buildManagerMessage";
+import IApplication from "../../types/ApplicationSchema";
 
 /**
  * Отправляет уведомление всем пользователям компании.
@@ -32,17 +34,10 @@ export async function sendMessageAllUsers({
     return { success: false, message: "Нет пользователей для уведомления." };
   }
 
-  const parts: string[] = [`🔔 <b>Заявка #${count + 1}:</b>\n`];
-
-  if (data.name) parts.push(`👤 Имя: ${data.name}`);
-  if (data.user_phone) parts.push(`📞 Телефон: ${data.user_phone}`);
-  if (data.user_post) parts.push(`📧 Почта: ${data.user_post}`);
-  if (data.user_address) parts.push(`🏢 Адрес: ${data.user_address}`);
-  if (data.user_company) parts.push(`💸 Адрес: ${data.user_company}`);
-  if (data.message) parts.push(`💬 Сообщение: ${data.message}`);
-  if (data.file) parts.push(`📎 Файл: В тестовом отсуствует`);
-
-  const message = parts.join("\n");
+  let new_message = buildManagerMessage({
+    ...data,
+    count: count + 1,
+  } as IApplication);
 
   try {
     const promises = users.map(
@@ -57,10 +52,9 @@ export async function sendMessageAllUsers({
             try {
               const sentMessage = await bot.telegram.sendMessage(
                 user.chat_id,
-                message,
+                new_message,
                 { parse_mode: "HTML" }
               );
-
               if (user.role === Role.manager) {
                 await bot.telegram.editMessageReplyMarkup(
                   user.chat_id,
@@ -77,7 +71,6 @@ export async function sendMessageAllUsers({
                 role: user.role,
                 message_id: sentMessage.message_id,
               });
-              
             } catch (err) {
               resolve({
                 chat_id: user.chat_id,
