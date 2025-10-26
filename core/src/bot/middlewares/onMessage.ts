@@ -5,6 +5,7 @@ import { userTariff } from "../action/user.tariff";
 import command_start from "../command/start";
 import { analiticsMurkup } from "../keyboards/analitics";
 import { applicationMurkup } from "../keyboards/application";
+import { edit } from "../keyboards/edit";
 import { managerMurkup } from "../keyboards/managers";
 import { subscribeMurkap } from "../keyboards/subscribe";
 import newManager from "./addManager";
@@ -27,6 +28,14 @@ const messageHandle = async (ctx: any) => {
 
     case "🏠 Главное меню":
       command_start(ctx);
+      break;
+
+    case "✏️ Изменить данные":
+      ctx.reply("Какие данные вы хотите изменить?", edit.metadata);
+      break;
+
+    case "✏️ Изменить Фамилию и Имя":
+      ctx.scene.enter("edit_user_fullname");
       break;
 
     case "💰 Подписка":

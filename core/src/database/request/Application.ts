@@ -425,3 +425,136 @@ export async function cancel_application({
     };
   }
 }
+
+/**
+ * Завершение заявки менеджером
+ * @param chat_id - ID чата пользователя
+ * @param message_id - ID сообщения заявки
+ */
+export async function finish_application({
+  chat_id,
+  message_id,
+}: {
+  chat_id: number;
+  message_id: number;
+}): Promise<
+  | { success: false; message: string }
+  | {
+      success: true;
+      message: string;
+      application: IApplication;
+      tag: string;
+      fullname: string;
+    }
+> {
+  try {
+    // 🔍 Находим заявку по chat_id и message_id
+    const application = await Application.findOne({
+      "chats.chat_id": chat_id,
+      "chats.message_id": message_id,
+    });
+
+    if (!application) {
+      return {
+        success: false,
+        message: `
+❌ <b>Заявка не найдена!</b>
+
+Возможные причины:
+• Сообщение было удалено  
+• Заявка уже обработана  
+• Ошибка идентификации
+`,
+      };
+    }
+
+    // 🔍 Находим пользователя
+    const user = await User.findOne({
+      company: application.company,
+      chat_id,
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        message: `
+🚫 <b>Доступ запрещён!</b>
+
+Вы не можете отменить эту заявку.  
+Возможно, вы больше не связаны с компанией.
+`,
+      };
+    }
+
+    // 🔒 Проверка компании
+    if (!user.company.equals(application.company)) {
+      return {
+        success: false,
+        message: `
+🏢 <b>Заявка принадлежит другой компании!</b>
+
+Обратитесь к администратору для уточнения.
+`,
+      };
+    }
+
+    // 👔 Проверка роли
+    if (user.role === Role.director) {
+      return {
+        success: false,
+        message: `
+👨‍💼 <b>Директор не может отменять заявки!</b>
+
+Эта функция доступна только менеджерам компании.
+`,
+      };
+    }
+
+    // 🧾 Проверка статуса
+    if (application.complite) {
+      return {
+        success: false,
+        message: `
+✅ <b>Заявка уже выполнена!</b>
+
+Нельзя завершить завершённую заявку.
+`,
+      };
+    }
+
+    // 🧑‍💼 Проверка, кто менеджер
+    if (String(application.manager) !== String(user._id)) {
+      return {
+        success: false,
+        message: `
+🚫 <b>Вы не можете завершить эту заявку!</b>
+
+Только менеджер, взявший заявку в работу, может её завершить.
+`,
+      };
+    }
+
+    // 🔧 Отмена заявки
+    application.status = Status.complete;
+    await application.save();
+
+    return {
+      success: true,
+      application,
+      message: `
+✅ <b>Заявка №${application.count} успешно выполнена!</b>`,
+      tag: user.user_tag,
+      fullname: `${user.name} ${user.surname || ""}`.trim(),
+    };
+  } catch (error) {
+    console.error("🚨 Ошибка в finish_application:", error);
+    return {
+      success: false,
+      message: `
+🚨 <b>Внутренняя ошибка сервера!</b>
+
+Пожалуйста, попробуйте позже или обратитесь в техническую поддержку.
+`,
+    };
+  }
+}

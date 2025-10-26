@@ -1,11 +1,7 @@
 import { Markup, Scenes, Context } from "telegraf";
 import { createUser } from "../../database/request/User";
 import { Role } from "../../types/UserSchema";
-import {
-  WizardContext,
-  WizardContextWizard,
-  WizardScene,
-} from "telegraf/scenes";
+
 
 interface RegistrationState {
   surname?: string;

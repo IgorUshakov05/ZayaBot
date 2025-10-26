@@ -89,6 +89,84 @@ export const createUser = async ({
   }
 };
 
+export const editUser = async ({
+  chat_id,
+  surname,
+  name,
+}: {
+  chat_id: number;
+  surname: string;
+  name: string;
+}): Promise<{ success: boolean; message: string }> => {
+  try {
+    // Валидация входных данных
+    if (!chat_id || !surname?.trim() || !name?.trim()) {
+      return {
+        success: false,
+        message: "❌ Пожалуйста, заполни все поля: имя и фамилия",
+      };
+    }
+
+    // Проверка длины данных
+    if (surname.length > 50 || name.length > 50) {
+      return {
+        success: false,
+        message: "❌ Имя и фамилия не должны превышать 50 символов",
+      };
+    }
+
+    // Обновление пользователя
+    const updatedUser = await User.findOneAndUpdate(
+      { chat_id },
+      {
+        $set: {
+          name: name.trim(),
+          surname: surname.trim(),
+          updatedAt: new Date(),
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedUser) {
+      return {
+        success: false,
+        message:
+          "❌ Ты еще не зарегистрирован в системе! Используй команду /start",
+      };
+    }
+
+    return {
+      success: true,
+      message: `✅ Теперь вы ${name.trim()} ${surname.trim()}!`,
+    };
+  } catch (error: any) {
+    console.error("Ошибка при обновлении пользователя:", error);
+
+    if (error.name === "ValidationError") {
+      return {
+        success: false,
+        message: "❌ Проверь правильность введенных данных",
+      };
+    }
+
+    if (error.name === "CastError") {
+      return {
+        success: false,
+        message: "❌ Неверный формат данных",
+      };
+    }
+
+    return {
+      success: false,
+      message: "😔 Произошла ошибка. Попробуй еще раз позже",
+    };
+  }
+};
+
 export const upBalanceUser = async ({
   chat_id,
   amount,
