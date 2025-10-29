@@ -159,7 +159,7 @@ export async function in_work_application({
     return {
       success: true,
       application,
-      tag: user.user_tag,
+      tag: user.user_tag ,
       fullname: `${user.name} ${!!user.surname ? user.surname : ""}`,
     };
   } catch (error) {

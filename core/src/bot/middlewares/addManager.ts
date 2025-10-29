@@ -1,7 +1,7 @@
 import { Context } from "telegraf";
 import { createCode } from "../../database/request/Code";
 import { Role } from "../../types/UserSchema";
-import { managerMurkup } from "../keyboards/managers";
+import { managerInlineKeyBoard } from "../keyboards/managers";
 
 export default async function newManager(
   ctx: Context & { chat: { id: number } }
@@ -10,7 +10,7 @@ export default async function newManager(
     let chat_id = ctx.chat?.id;
     let newCode = await createCode({ chat_id, role: Role.manager });
     if (!newCode.success) {
-      return ctx.reply(newCode.message, managerMurkup.errorAddManager);
+      return ctx.reply(newCode.message, managerInlineKeyBoard.errorAddManager);
     }
     await ctx.reply(
       `🔗 *Ссылка для регистрации менеджера создана!*
@@ -24,6 +24,6 @@ export default async function newManager(
     );
   } catch (error) {
     console.error(error);
-    return ctx.reply("Ошибка сервера!", managerMurkup.errorAddManager);
+    return ctx.reply("Ошибка сервера!", managerInlineKeyBoard.errorAddManager);
   }
 }

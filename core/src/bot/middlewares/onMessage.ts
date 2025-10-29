@@ -1,16 +1,17 @@
 import conf from "../../config/config";
 import { getTariff } from "../../database/request/User";
 import { PaymentPlan, PaymentType } from "../../types/UserSchema";
-import { userTariff } from "../action/user.tariff";
+import { userTariffAction } from "../action/user.tariff";
 import command_start from "../command/start";
 import { analiticsMurkup } from "../keyboards/analitics";
 import { applicationMurkup } from "../keyboards/application";
 import { edit } from "../keyboards/edit";
-import { managerMurkup } from "../keyboards/managers";
+import { managerInlineKeyBoard } from "../keyboards/managers";
 import { subscribeMurkap } from "../keyboards/subscribe";
 import newManager from "./addManager";
 import notificationMessageEvent from "./notification";
 import { replyMessag } from "./onReply";
+import removeManager from "./removeManager";
 
 // Обработчик сообщений
 const messageHandle = async (ctx: any) => {
@@ -38,10 +39,14 @@ const messageHandle = async (ctx: any) => {
       ctx.scene.enter("edit_user_fullname");
       break;
 
+    case "➖ Удалить менеджера":
+      removeManager(ctx);
+      break;
+
     case "💰 Подписка":
       let user_tariff = await getTariff({ chat_id: ctx.chat.id });
       if (!user_tariff.success) return ctx.reply(user_tariff.message);
-      let user_pay = userTariff({
+      let user_pay = userTariffAction({
         payment_plan: user_tariff.payment_plan,
         payment_type: user_tariff.payment_type,
       });
@@ -143,7 +148,7 @@ ${user_pay.allowedFields.map((item) => `✓ ${item}`).join("\n")}
       break;
 
     case "👥 Менеджеры":
-      ctx.reply("👥 Управление менеджерами!\nЧто делаем?", managerMurkup.first);
+      ctx.reply("👥 Управление менеджерами!\nЧто делаем?", managerInlineKeyBoard.first);
       break;
 
     case "📊 Аналитика":

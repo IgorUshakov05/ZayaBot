@@ -4,7 +4,7 @@ import { applicationManageMurkap } from "../keyboards/application";
 import { buildManagerMessage } from "../global/buildManagerMessage";
 import { Role } from "../../types/UserSchema";
 
-const cancelApplication = async (
+const cancelApplicationAction = async (
   ctx: Context & { match: RegExpMatchArray }
 ) => {
   try {
@@ -89,4 +89,4 @@ const cancelApplication = async (
   }
 };
 
-export default cancelApplication;
+export default cancelApplicationAction;

@@ -147,7 +147,7 @@ requestRouter.post(
             message: send_message.message,
           });
         }
-        console.log(send_message.chat_data)
+        console.log(send_message.chat_data);
         let save_application_with_chat_ids = await create_application({
           api_key,
           count: data.count + 1,

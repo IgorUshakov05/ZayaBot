@@ -3,7 +3,7 @@ import {  in_work_application } from "../../database/request/Application";
 import { applicationManageMurkap } from "../keyboards/application";
 import { buildManagerMessage } from "../global/buildManagerMessage";
 
-const inWork = async (ctx: Context & { match: RegExpMatchArray }) => {
+const inWorkAction = async (ctx: Context & { match: RegExpMatchArray }) => {
   try {
     // Сразу отвечаем на callback query
     await ctx.answerCbQuery("🔄 Обрабатываю запрос...");
@@ -86,4 +86,4 @@ const inWork = async (ctx: Context & { match: RegExpMatchArray }) => {
   }
 };
 
-export default inWork;
+export default inWorkAction;

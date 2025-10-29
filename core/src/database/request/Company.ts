@@ -160,6 +160,64 @@ export async function is_verefy_company_of_director({
   }
 }
 
+export async function remove_manager_from_company({
+  director_chat_id,
+  manager__id,
+}: {
+  manager__id: string;
+  director_chat_id: number;
+}): Promise<{ success: boolean; message: string }> {
+  try {
+    const director = await User.findOne({
+      chat_id: director_chat_id,
+      role: Role.director,
+    }).populate<{
+      company: ICompanySchema & {
+        users: IUser[];
+      };
+    }>({
+      path: "company",
+      populate: {
+        path: "users",
+        match: { role: Role.manager, _id: manager__id },
+        select: "name surname _id chat_id user_tag",
+      },
+    });
+
+    if (!director) {
+      return { success: false, message: "Директор не найден" };
+    }
+
+    if (!director.company) {
+      return { success: false, message: "Компания не привязана" };
+    }
+
+    if (!director.company.users || director.company.users.length === 0) {
+      return { success: false, message: "Менеджер не найден" };
+    }
+
+    const manager = director.company.users[0];
+
+    await Company.findByIdAndUpdate(director.company._id, {
+      $pull: {
+        users: manager._id,
+      },
+    });
+
+    await User.findByIdAndDelete(manager._id);
+
+    return {
+      success: true,
+      message: `✅ Менеджер ${manager.name} ${
+        manager.surname ? "" : manager.surname
+      } успешно удален из компании`,
+    };
+  } catch (error) {
+    console.error("Ошибка в функции remove_manager_from_company", error);
+    return { success: false, message: "Ошибка сервера" };
+  }
+}
+
 /**
  * Удаляет компанию и всех связанных с ней пользователей.
  *

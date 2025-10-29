@@ -76,7 +76,19 @@ export const checkTariff = ({
   | { success: true; filtredApplication: ApplicationData }
   | { success: false; message: string } => {
   try {
-    // Обработка подписки
+      // Обработка оплаты по запросу
+    if (payment_type === PaymentType.PER_REQUEST) {
+      // Проверяем достаточно ли средств на балансе
+      if (balance < conf.PRICE_PER_REQUEST) {
+        return {
+          success: false,
+          message: tariffMessages.per_request(balance),
+        };
+      }
+
+      // Для оплаты по запросу возвращаем все поля заявки
+      return { success: true, filtredApplication: application };
+    }
     if (payment_type === PaymentType.SUBSCRIPTION) {
       const config = TARIFF_CONFIG[payment_plan];
 
@@ -115,21 +127,7 @@ export const checkTariff = ({
       return { success: true, filtredApplication };
     }
 
-    // Обработка оплаты по запросу
-    if (payment_type === PaymentType.PER_REQUEST) {
-      // Проверяем достаточно ли средств на балансе
-      if (balance < conf.PRICE_PER_REQUEST) {
-        return {
-          success: false,
-          message: tariffMessages.per_request(balance),
-        };
-      }
-
-      // Для оплаты по запросу возвращаем все поля заявки
-      return { success: true, filtredApplication: application };
-    }
-
-    // Если тип оплаты не распознан
+      // Если тип оплаты не распознан
     return {
       success: false,
       message: "Неизвестный тип оплаты",

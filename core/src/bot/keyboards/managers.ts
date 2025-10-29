@@ -1,11 +1,7 @@
-// - [➕ Добавить менеджера]
-// - [➖ Удалить менеджера]
-// - [✏️ Редактировать менеджера]
-
+import { Types } from "mongoose";
 import { Markup } from "telegraf";
-import { markAsUncloneable } from "worker_threads";
 
-export const managerMurkup = {
+export const managerInlineKeyBoard = {
   first: {
     ...Markup.keyboard([
       ["➕ Добавить менеджера", "➖ Удалить менеджера"],
@@ -16,4 +12,15 @@ export const managerMurkup = {
   errorAddManager: {
     ...Markup.keyboard([["🏠 Главное меню"]]).resize(true),
   },
+};
+
+export const managerInline = (manager_id: string) => {
+  return {
+    removeManager: {
+      ...Markup.inlineKeyboard([
+        { text: "Удалить", callback_data: `removemanager_${manager_id}` },
+      ]),
+      keyboard: managerInlineKeyBoard.errorAddManager.reply_markup,
+    },
+  };
 };

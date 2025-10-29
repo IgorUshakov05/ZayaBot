@@ -13,16 +13,15 @@ import registrationUser from "./scenes/registrationUser";
 import topupBalanceWizard from "./scenes/topUpBalance";
 import editUserWizard from "./scenes/editUser";
 
-
 import removeTextCompany from "./action/removeCompany";
 import topupBalance from "./action/topup_balance";
 import tariffBalance from "./action/tariff";
 import toggleTariffWizard from "./scenes/tariff";
 import notificationAction from "./action/notification";
-import inWork from "./action/inWork.application";
-import { REPL_MODE_SLOPPY } from "repl";
-import cancelApplication from "./action/cancel.application";
-import finishApplication from "./action/finish.application";
+import inWorkAction from "./action/inWork.application";
+import cancelApplicationAction from "./action/cancel.application";
+import finishApplicationAction from "./action/finish.application";
+import removeManagerAction from "./action/removemanager";
 
 // Типизация контекста для Wizard
 type MyContext = Scenes.WizardContext;
@@ -34,7 +33,6 @@ const stage = new Scenes.Stage<MyContext>([
   toggleTariffWizard,
   topupBalanceWizard,
   editUserWizard,
-
 ]);
 bot.use(session());
 bot.use(stage.middleware());
@@ -45,9 +43,10 @@ bot.action("remove_test_company", removeTextCompany);
 bot.action("topup_balance", topupBalance);
 bot.action(/^tariff_(.+)$/, tariffBalance);
 bot.action(/^notification_(off|on)$/, notificationAction);
-bot.action(/^inwork_(\d+)/, inWork as any);
-bot.action(/^cancel_(\d+)/, cancelApplication);
-bot.action(/^finish_(\d+)/, finishApplication)
+bot.action(/^inwork_(\d+)/, inWorkAction as any);
+bot.action(/^cancel_(\d+)/, cancelApplicationAction);
+bot.action(/^finish_(\d+)/, finishApplicationAction);
+bot.action(/^removemanager_(\d+)/, removeManagerAction as any);
 
 bot.on("text", messageHandle);
 export default bot;

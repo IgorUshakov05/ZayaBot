@@ -1,7 +1,7 @@
 import { Context } from "telegraf";
 import { delete_company } from "../../database/request/Company";
 
-const removeTextCompany = async (ctx: Context & { from: { id: number } }) => {
+const removeTextCompanyAction = async (ctx: Context & { from: { id: number } }) => {
   try {
     await ctx.answerCbQuery();
     let delete_request = await delete_company({
@@ -16,4 +16,4 @@ const removeTextCompany = async (ctx: Context & { from: { id: number } }) => {
     );
   }
 };
-export default removeTextCompany;
+export default removeTextCompanyAction;

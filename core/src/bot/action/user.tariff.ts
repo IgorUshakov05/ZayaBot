@@ -66,7 +66,7 @@ type TariffInfo = {
   managers: string | number;
 };
 
-export const userTariff = ({
+export const userTariffAction = ({
   payment_plan,
   payment_type,
 }: {

@@ -2,7 +2,7 @@ import { Context } from "telegraf";
 import { finish_application } from "../../database/request/Application";
 import { Role } from "../../types/UserSchema";
 
-const finishApplication = async (
+const finishApplicationAction = async (
   ctx: Context & { match: RegExpMatchArray }
 ) => {
   try {
@@ -86,4 +86,4 @@ const finishApplication = async (
   }
 };
 
-export default finishApplication;
+export default finishApplicationAction;

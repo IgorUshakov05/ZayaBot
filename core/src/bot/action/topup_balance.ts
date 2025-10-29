@@ -1,4 +1,4 @@
-const topupBalance = async (ctx: any) => {
+const topupBalanceAction = async (ctx: any) => {
   try {
     await ctx.answerCbQuery();
     return ctx.scene.enter("topup_balance");
@@ -7,4 +7,4 @@ const topupBalance = async (ctx: any) => {
     await ctx.reply("⚠️ Произошла ошибка. Попробуйте позже.");
   }
 };
-export default topupBalance;
+export default topupBalanceAction;

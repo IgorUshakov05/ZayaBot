@@ -1,7 +1,7 @@
-import { Types } from "mongoose";
+import { Document, Types } from "mongoose";
 import { ICompanySchema } from "../../types/CompanySchema";
 import { ICreateManager } from "../../types/PropsFuntion";
-import {
+import IUser, {
   PaymentPlan,
   PaymentType,
   PricePlan,
@@ -88,6 +88,75 @@ export const createUser = async ({
     };
   }
 };
+
+export const getManagers = async (
+  chat_id: number
+): Promise<
+  | { success: false; message: string }
+  | {
+      success: true;
+      managers: Pick<
+        IUser,
+        "name" | "surname" | "_id" | "chat_id" | "user_tag"
+      >[];
+    }
+> => {
+  try {
+    const director = await User.findOne({
+      chat_id,
+      role: Role.director,
+    }).populate<{
+      company: ICompanySchema & {
+        users: Pick<
+          IUser,
+          "name" | "surname" | "_id" | "chat_id" | "user_tag"
+        >[];
+      };
+    }>({
+      path: "company",
+      populate: {
+        path: "users",
+        match: { role: Role.manager },
+        select: "name surname _id chat_id user_tag",
+      },
+    });
+
+    if (!director) {
+      return { success: false, message: "Директор не найден" };
+    }
+
+    if (!director.company) {
+      return { success: false, message: "Компания не привязана" };
+    }
+
+    const managers = director.company.users;
+
+    if (managers.length === 0) {
+      return {
+        success: false,
+        message:
+          "Менеджеры не назначены\n\nДобавьте хотя бы одного менеджера в компанию.",
+      };
+    }
+
+    return {
+      success: true,
+      managers,
+    };
+  } catch (error) {
+    console.error("Ошибка в getManagers: ", error);
+    return {
+      success: false,
+      message:
+        "Что-то пошло не так\n\nПопробуйте позже или обратитесь к администратору.",
+    };
+  }
+};
+
+(async () => {
+  let users = await getManagers(5915898367);
+  console.log(users);
+})();
 
 export const editUser = async ({
   chat_id,
