@@ -14,10 +14,9 @@ export default interface IApplication extends Document {
   user_company?: string;
   manager: Types.ObjectId;
   comment: string | null;
-  complite: boolean;
   file?: string;
   count: number;
-  chats: { chat_id: number; message_id: number, role: Role }[];
+  chats: { chat_id: number; message_id: number; role: Role }[];
   company: Types.ObjectId;
   user_post?: string;
   message?: string;

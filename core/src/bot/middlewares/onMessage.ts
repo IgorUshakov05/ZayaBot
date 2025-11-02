@@ -1,6 +1,7 @@
 import conf from "../../config/config";
 import { getTariff } from "../../database/request/User";
 import { PaymentPlan, PaymentType } from "../../types/UserSchema";
+import exportApplication from "../action/exportApplication";
 import { userTariffAction } from "../action/user.tariff";
 import command_start from "../command/start";
 import { analiticsMurkup } from "../keyboards/analitics";
@@ -12,6 +13,7 @@ import newManager from "./addManager";
 import notificationMessageEvent from "./notification";
 import { replyMessag } from "./onReply";
 import removeManager from "./removeManager";
+import getAllApplication from "./showAllApplication";
 
 // Обработчик сообщений
 const messageHandle = async (ctx: any) => {
@@ -33,6 +35,14 @@ const messageHandle = async (ctx: any) => {
 
     case "✏️ Изменить данные":
       ctx.reply("Какие данные вы хотите изменить?", edit.metadata);
+      break;
+
+    case "📊 Показать все":
+      getAllApplication(ctx);
+      break;
+
+    case "📥 Экспортировать":
+      ctx.reply("Выберите формат экспорта:", applicationMurkup.formatExport);
       break;
 
     case "✏️ Изменить Фамилию и Имя":
@@ -148,7 +158,10 @@ ${user_pay.allowedFields.map((item) => `✓ ${item}`).join("\n")}
       break;
 
     case "👥 Менеджеры":
-      ctx.reply("👥 Управление менеджерами!\nЧто делаем?", managerInlineKeyBoard.first);
+      ctx.reply(
+        "👥 Управление менеджерами!\nЧто делаем?",
+        managerInlineKeyBoard.first
+      );
       break;
 
     case "📊 Аналитика":

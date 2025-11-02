@@ -20,10 +20,7 @@ const ApplicationSchema = new Schema<IApplication>(
       type: String,
       default: null,
     },
-    complite: {
-      type: Boolean,
-      default: false,
-    },
+   
     chats: [
       {
         chat_id: { type: Number, required: true },

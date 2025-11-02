@@ -21,6 +21,7 @@ import notificationAction from "./action/notification";
 import inWorkAction from "./action/inWork.application";
 import cancelApplicationAction from "./action/cancel.application";
 import finishApplicationAction from "./action/finish.application";
+import exportApplication from "./action/exportApplication";
 import removeManagerAction from "./action/removemanager";
 
 // Типизация контекста для Wizard
@@ -47,6 +48,7 @@ bot.action(/^inwork_(\d+)/, inWorkAction as any);
 bot.action(/^cancel_(\d+)/, cancelApplicationAction);
 bot.action(/^finish_(\d+)/, finishApplicationAction);
 bot.action(/^removemanager_(\d+)/, removeManagerAction as any);
+bot.action(/exportApplication/, exportApplication)
 
 bot.on("text", messageHandle);
 export default bot;

@@ -63,7 +63,7 @@ export const createUser = async ({
     // 5️⃣ Добавляем пользователя в компанию через $push
     const updatedCompany = await Company.findOneAndUpdate(
       { _id: searchCode.company._id },
-      { $push: { users: newUser._id } }, // ← исправлено!
+      { $push: { users: newUser._id } }, 
       { new: true }
     );
 

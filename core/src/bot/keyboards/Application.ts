@@ -12,6 +12,14 @@ export const applicationMurkup = {
       ["🏠 Главное меню"],
     ]).resize(true),
   },
+  export: Markup.inlineKeyboard([
+    Markup.button.callback("📥 Экспортировать", "exportApplication"),
+  ]),
+  formatExport: Markup.inlineKeyboard([
+    Markup.button.callback("📑 Excel", "export_exel"),
+    Markup.button.callback("📄 CSV", "export_csv"),
+    Markup.button.callback("📕 PDF", "export_pdf"),
+  ]),
 };
 
 export const applicationManageMurkap = (message_id: number) => {

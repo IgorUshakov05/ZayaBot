@@ -1,11 +1,12 @@
 import { Types } from "mongoose";
 import { ApplicationData } from "../../types/Application";
-import { Role } from "../../types/UserSchema";
+import IUser, { Role } from "../../types/UserSchema";
 import { Application } from "../schema/ApplicationSchema";
 import { Company } from "../schema/CompanySchema";
 import { User } from "../schema/UserSchema";
 import IApplication, { Status } from "../../types/ApplicationSchema";
 import app from "../../web";
+import { ICompanySchema } from "../../types/CompanySchema";
 
 /**
  * Создаёт новую заявку и связывает её с компанией по api_key.
@@ -97,7 +98,7 @@ export async function in_work_application({
       };
 
     if (application.manager) {
-      if (application.complite) {
+      if (application.status === Status.complete) {
         return {
           success: false,
           message:
@@ -244,7 +245,7 @@ export async function add_comment_application({
     }
 
     // Проверяем статус заявки
-    if (application.complite) {
+    if (application.status === Status.complete) {
       return {
         success: false,
         message:
@@ -374,7 +375,7 @@ export async function cancel_application({
     }
 
     // 🧾 Проверка статуса
-    if (application.complite) {
+    if (application.status === Status.complete) {
       return {
         success: false,
         message: `
@@ -511,7 +512,7 @@ export async function finish_application({
     }
 
     // 🧾 Проверка статуса
-    if (application.complite) {
+    if (application.status === Status.complete) {
       return {
         success: false,
         message: `
@@ -558,3 +559,58 @@ export async function finish_application({
     };
   }
 }
+
+export async function get_all_application({
+  chat_id,
+}: {
+  chat_id: number;
+}): Promise<
+  | { success: false; message: string }
+  | { success: true; applications: IApplication[] }
+> {
+  try {
+    const user = await User.findOne({
+      chat_id,
+      role: Role.director,
+    })
+      .select("company")
+      .populate<{
+        company: {
+          applications: IApplication[];
+        } & ICompanySchema;
+      }>({
+        path: "company",
+        populate: {
+          path: "applications",
+        },
+      })
+      .lean();
+
+    if (!user) {
+      return { success: false, message: "❌ Вас нет в системе!" };
+    }
+
+    if (!user.company) {
+      return { success: false, message: "❌ У вас нет компании!" };
+    }
+
+    const applications = user.company.applications ?? [];
+
+    if (applications.length === 0) {
+      return {
+        success: false,
+        message: "⏳ Пока новых заявок нет. Ждём клиентов!",
+      };
+    }
+
+    return {
+      success: true,
+      applications,
+    };
+  } catch (error) {
+    console.error("Ошибка в get_all_application:", error);
+    return { success: false, message: "Произошла ошибка. Попробуйте позже." };
+  }
+}
+
+

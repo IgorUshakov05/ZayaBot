@@ -1,6 +1,7 @@
 import { Markup, Scenes, Context } from "telegraf";
 import { createUser } from "../../database/request/User";
 import { Role } from "../../types/UserSchema";
+import { start } from "../keyboards/start";
 
 
 interface RegistrationState {
@@ -89,6 +90,7 @@ const registrationManagerWizard = new Scenes.WizardScene<MyContext>(
     if (result.success) {
       await ctx.reply(result.message, {
         parse_mode: "Markdown",
+        ...start.auth.manager
       });
     } else {
       await ctx.reply(
