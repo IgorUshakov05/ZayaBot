@@ -93,7 +93,7 @@ export async function in_work_application({
       return {
         success: false,
         message:
-          "❌ Заявка не найдена!\n\nВозможные причины:\n• Сообщение было удалено\n• Заявка уже обработана\n• Ошибка идентификации",
+          "❌ Заявка не найдена!\n\nВозможные причины:\n• Сообщение было удалено\n• Заявка уже обработана\n• Ошибка идентификации\n• Вас удалили из компании",
       };
 
     if (application.manager) {
@@ -159,7 +159,7 @@ export async function in_work_application({
     return {
       success: true,
       application,
-      tag: user.user_tag ,
+      tag: user.user_tag,
       fullname: `${user.name} ${!!user.surname ? user.surname : ""}`,
     };
   } catch (error) {
@@ -208,7 +208,7 @@ export async function add_comment_application({
       return {
         success: false,
         message:
-          "❌ Заявка не найдена!\n\nВозможные причины:\n• Сообщение было удалено\n• Заявка уже обработана\n• Ошибка идентификации",
+          "❌ Заявка не найдена!\n\nВозможные причины:\n• Сообщение было удалено\n• Заявка уже обработана\n• Ошибка идентификации\n• Вас удалили из компании",
       };
     }
 
@@ -326,7 +326,7 @@ export async function cancel_application({
 Возможные причины:
 • Сообщение было удалено  
 • Заявка уже обработана  
-• Ошибка идентификации
+• Вас удалили из компании
 `,
       };
     }

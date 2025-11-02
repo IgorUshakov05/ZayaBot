@@ -153,10 +153,7 @@ export const getManagers = async (
   }
 };
 
-(async () => {
-  let users = await getManagers(5915898367);
-  console.log(users);
-})();
+
 
 export const editUser = async ({
   chat_id,

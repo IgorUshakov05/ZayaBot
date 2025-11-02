@@ -4,7 +4,8 @@ import { User } from "../schema/UserSchema";
 import { v4 as uuidv4 } from "uuid";
 import { ICompanySchema } from "../../types/CompanySchema";
 import IUser, { PaymentPlan, PaymentType, Role } from "../../types/UserSchema";
-import IApplication from "../../types/ApplicationSchema";
+import IApplication, { Status } from "../../types/ApplicationSchema";
+import { Application } from "../schema/ApplicationSchema";
 
 interface CreateCompanyParams {
   user: { user_tag: string; chat_id: number; name: string };
@@ -203,6 +204,18 @@ export async function remove_manager_from_company({
         users: manager._id,
       },
     });
+
+    // Если у менеджера были заявки то мы стаим заявки как новые
+    await Application.updateMany(
+      { manager: manager._id },
+      { $set: { manager: null, status: Status.pending } }
+    );
+
+    // Удаляем его chat_id с заявок
+    await Application.updateMany(
+      { "chats.chat_id": manager.chat_id },
+      { $pull: { chats: { chat_id: manager.chat_id } } }
+    );
 
     await User.findByIdAndDelete(manager._id);
 
