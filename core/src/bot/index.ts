@@ -22,7 +22,8 @@ import inWorkAction from "./action/inWork.application";
 import cancelApplicationAction from "./action/cancel.application";
 import finishApplicationAction from "./action/finish.application";
 import exportApplication from "./action/exportApplication";
-import removeManagerAction from "./action/removemanager";
+import removeManagerAction from "./action/removeManager";
+import exportDocument from "./action/exportDocument";
 
 // Типизация контекста для Wizard
 type MyContext = Scenes.WizardContext;
@@ -49,6 +50,7 @@ bot.action(/^cancel_(\d+)/, cancelApplicationAction);
 bot.action(/^finish_(\d+)/, finishApplicationAction);
 bot.action(/^removemanager_(\d+)/, removeManagerAction as any);
 bot.action(/exportApplication/, exportApplication)
+bot.action(/^export_(pdf|excel|csv)$/,exportDocument)
 
 bot.on("text", messageHandle);
 export default bot;

@@ -582,6 +582,9 @@ export async function get_all_application({
         path: "company",
         populate: {
           path: "applications",
+          populate: {
+            path: "manager",
+          },
         },
       })
       .lean();
@@ -612,5 +615,3 @@ export async function get_all_application({
     return { success: false, message: "Произошла ошибка. Попробуйте позже." };
   }
 }
-
-

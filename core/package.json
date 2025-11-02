@@ -28,6 +28,7 @@
     "@types/express-validator": "^2.20.33",
     "@types/multer": "^2.0.0",
     "cors": "^2.8.5",
+    "exceljs": "^4.4.0",
     "express-validator": "^7.2.1",
     "mongoose": "^8.19.0",
     "multer": "^2.0.2",

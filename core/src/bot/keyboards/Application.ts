@@ -16,7 +16,7 @@ export const applicationMurkup = {
     Markup.button.callback("📥 Экспортировать", "exportApplication"),
   ]),
   formatExport: Markup.inlineKeyboard([
-    Markup.button.callback("📑 Excel", "export_exel"),
+    Markup.button.callback("📑 Excel", "export_excel"),
     Markup.button.callback("📄 CSV", "export_csv"),
     Markup.button.callback("📕 PDF", "export_pdf"),
   ]),
