@@ -7,7 +7,6 @@ import { get_all_application } from "../../database/request/Application";
 import { exportApplicationsToCSV } from "../service/exportCSV";
 
 enum ExportFormat {
-  pdf = "pdf",
   excel = "excel",
   csv = "csv",
 }
@@ -72,17 +71,9 @@ const exportDocument = async (ctx: any) => {
         { source: filePath, filename: fileName },
         { caption: "Ваш экспорт в CSV готов!" }
       );
-    } else if (format === ExportFormat.pdf) {
-      // const csv = await exportApplicationsToCSV(
-      //   applications.applications as any
-      // );
-      // fs.writeFileSync(filePath, csv);
-      // await ctx.replyWithDocument(
-      //   { source: filePath, filename: fileName },
-      //   { caption: "Ваш экспорт в CSV готов!" }
-      // );
     }
-
+    await fs.unlinkSync(filePath);
+    console.log("Файл удален: ", filePath);
     await ctx.deleteMessage();
     await ctx.answerCbQuery();
   } catch (err: any) {

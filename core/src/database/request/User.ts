@@ -10,6 +10,7 @@ import IUser, {
 import { Code } from "../schema/CodeSchema";
 import { User } from "../schema/UserSchema";
 import { Company } from "../schema/CompanySchema";
+import { toTitleCase } from "../../bot/global/toTitleCase";
 
 export const createUser = async ({
   surname,
@@ -63,7 +64,7 @@ export const createUser = async ({
     // 5️⃣ Добавляем пользователя в компанию через $push
     const updatedCompany = await Company.findOneAndUpdate(
       { _id: searchCode.company._id },
-      { $push: { users: newUser._id } }, 
+      { $push: { users: newUser._id } },
       { new: true }
     );
 
@@ -152,8 +153,6 @@ export const getManagers = async (
     };
   }
 };
-
-
 
 export const editUser = async ({
   chat_id,
@@ -438,7 +437,7 @@ export const checkUserRole = async ({
         newUser: false,
         test_company: false,
         role: findUser.role,
-        message: `*${findUser.name}*, здравствуйте!
+        message: `*${toTitleCase(findUser.name)}*, здравствуйте!
 Выберите действие в меню ниже 👇`,
       };
     }
@@ -450,7 +449,7 @@ export const checkUserRole = async ({
         newUser: false,
         test_company: false,
         role: findUser.role,
-        message: `🎉 Добро пожаловать обратно, *${findUser.name}*!
+        message: `🎉 Добро пожаловать обратно, *${toTitleCase(findUser.name)}*!
 
 Вы успешно вошли в систему.
 👤 Роль: *${findUser.role}*${

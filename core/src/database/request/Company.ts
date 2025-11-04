@@ -205,9 +205,8 @@ export async function remove_manager_from_company({
       },
     });
 
-    // Если у менеджера были заявки то мы стаим заявки как новые
     await Application.updateMany(
-      { manager: manager._id },
+      { manager: manager._id, status: Status.inWork },
       { $set: { manager: null, status: Status.pending } }
     );
 

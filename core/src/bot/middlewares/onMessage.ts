@@ -12,8 +12,10 @@ import { subscribeMurkap } from "../keyboards/subscribe";
 import newManager from "./addManager";
 import notificationMessageEvent from "./notification";
 import { replyMessag } from "./onReply";
+import getRatingManager from "./ratingManagers";
 import removeManager from "./removeManager";
 import getAllApplication from "./showAllApplication";
+import statusApplication from "./statusApplication";
 
 // Обработчик сообщений
 const messageHandle = async (ctx: any) => {
@@ -41,8 +43,16 @@ const messageHandle = async (ctx: any) => {
       getAllApplication(ctx);
       break;
 
+    case "👥 Эффективность менеджеров":
+      getRatingManager(ctx);
+      break;
+
     case "📥 Экспортировать":
       ctx.reply("Выберите формат экспорта:", applicationMurkup.formatExport);
+      break;
+
+    case "🔍 Статусы заявок":
+      statusApplication(ctx);
       break;
 
     case "✏️ Изменить Фамилию и Имя":
@@ -171,12 +181,6 @@ ${user_pay.allowedFields.map((item) => `✓ ${item}`).join("\n")}
       );
       break;
 
-    case "📈 Заявки за период":
-      ctx.reply(
-        "📊 Выберите период, за который необходимо отобразить статистику заявок:",
-        analiticsMurkup.period
-      );
-      break;
 
     case "📋 Заявки":
       ctx.reply(

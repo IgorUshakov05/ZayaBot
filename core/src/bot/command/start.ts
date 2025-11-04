@@ -12,7 +12,6 @@ const command_start = async (
   const user_check = await checkUserRole({ chat_id: ctx.chat.id });
 
   if (!user_check.success) {
-    // Ошибка сервера или базы данных
     return ctx.reply(user_check.message);
   }
   let code = ctx.startPayload;
@@ -72,7 +71,6 @@ const command_start = async (
       });
 
     case Role.manager:
-      // Менеджер — показать меню менеджера
       return ctx.reply(user_check.message, {
         ...start.auth.manager,
         parse_mode: "Markdown",

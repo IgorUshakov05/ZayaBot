@@ -5,8 +5,9 @@ import { Application } from "../schema/ApplicationSchema";
 import { Company } from "../schema/CompanySchema";
 import { User } from "../schema/UserSchema";
 import IApplication, { Status } from "../../types/ApplicationSchema";
-import app from "../../web";
 import { ICompanySchema } from "../../types/CompanySchema";
+import { startOfMonth, endOfMonth } from "date-fns";
+import { toTitleCase } from "../../bot/global/toTitleCase";
 
 /**
  * Создаёт новую заявку и связывает её с компанией по api_key.
@@ -560,6 +561,77 @@ export async function finish_application({
   }
 }
 
+export async function get_status_application({
+  chat_id,
+}: {
+  chat_id: number;
+}): Promise<
+  | { success: false; message: string }
+  | {
+      success: true;
+      status: {
+        [Status.pending]: number;
+        [Status.inWork]: number;
+        [Status.complete]: number;
+      };
+    }
+> {
+  try {
+    const user = await User.findOne({
+      chat_id,
+      role: Role.director,
+    })
+      .select("company")
+      .populate<{
+        company: {
+          applications: IApplication[];
+        } & ICompanySchema;
+      }>({
+        path: "company",
+        populate: {
+          path: "applications",
+          select: "status",
+        },
+      })
+      .lean();
+
+    if (!user) {
+      return { success: false, message: "❌ Вас нет в системе!" };
+    }
+
+    if (!user.company) {
+      return { success: false, message: "❌ У вас нет компании!" };
+    }
+
+    const applications = user.company.applications ?? [];
+
+    if (applications.length === 0) {
+      return {
+        success: false,
+        message: "⏳ Пока новых заявок нет. Ждём клиентов!",
+      };
+    }
+    let status = applications.reduce(
+      (acc: any, app) => {
+        const key = app.status;
+        if (!key) key: 0;
+        acc[key] = acc[key] + 1;
+        return acc;
+      },
+      { [Status.pending]: 0, [Status.inWork]: 0, [Status.complete]: 0 }
+    );
+
+    // { success: true, status: { pending: number, inWork: number, complete: number } }
+    return {
+      success: true,
+      status,
+    };
+  } catch (error) {
+    console.error("Ошибка в get_all_application:", error);
+    return { success: false, message: "Произошла ошибка. Попробуйте позже." };
+  }
+}
+
 export async function get_all_application({
   chat_id,
 }: {
@@ -612,6 +684,107 @@ export async function get_all_application({
     };
   } catch (error) {
     console.error("Ошибка в get_all_application:", error);
+    return { success: false, message: "Произошла ошибка. Попробуйте позже." };
+  }
+}
+
+export async function get_all_application_and_month_rating({
+  chat_id,
+}: {
+  chat_id: number;
+}): Promise<
+  | { success: false; message: string }
+  | {
+      success: true;
+      monthCountApplication: number;
+      rating: {
+        name: string;
+        user_tag: string | null;
+        count: number;
+      }[];
+    }
+> {
+  try {
+    const monthStart = startOfMonth(new Date());
+    const monthEnd = endOfMonth(new Date());
+
+    const user = await User.findOne({
+      chat_id,
+      role: Role.director,
+    })
+      .select("company")
+      .populate<{
+        company: ICompanySchema & {
+          applications: (IApplication & {
+            manager: { name: string; surname: string; user_tag: string } | null;
+          })[];
+        };
+      }>({
+        path: "company",
+        populate: {
+          path: "applications",
+          match: {
+            status: Status.complete,
+            updatedAt: { $gte: monthStart, $lt: monthEnd },
+          },
+          populate: {
+            path: "manager",
+            select: "name surname user_tag",
+          },
+        },
+      })
+      .lean();
+
+    if (!user) {
+      return { success: false, message: "Вас нет в системе!" };
+    }
+
+    if (!user.company) {
+      return { success: false, message: "У вас нет компании!" };
+    }
+
+    const allCountApplication = await Application.countDocuments({
+      company: user.company._id,
+      updatedAt: { $gte: monthStart, $lt: monthEnd },
+    });
+
+    const monthApplications = user.company.applications ?? [];
+
+    if (monthApplications.length === 0) {
+      return {
+        success: true,
+        monthCountApplication: 0,
+        rating: [],
+      };
+    }
+
+    const groupedByManager = monthApplications.reduce((acc, app: any) => {
+      const key = app.manager?._id?.toString() ?? "no-manager";
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(app);
+      return acc;
+    }, {} as Record<string, typeof monthApplications>);
+
+    const rating = Object.entries(groupedByManager)
+      .map(([managerId, apps]: any[]) => {
+        const manager = apps[0].manager;
+        return {
+          name: manager
+            ? `${toTitleCase(manager.name)} ${toTitleCase(manager.surname)}`
+            : "Без менеджера",
+          user_tag: manager?.user_tag ? `@${manager.user_tag}` : null,
+          count: apps.length,
+        };
+      })
+      .sort((a, b) => b.count - a.count);
+
+    return {
+      success: true,
+      monthCountApplication: allCountApplication,
+      rating,
+    };
+  } catch (error) {
+    console.error("Ошибка в get_all_application_and_month_rating:", error);
     return { success: false, message: "Произошла ошибка. Попробуйте позже." };
   }
 }

@@ -50,7 +50,7 @@ bot.action(/^cancel_(\d+)/, cancelApplicationAction);
 bot.action(/^finish_(\d+)/, finishApplicationAction);
 bot.action(/^removemanager_(\d+)/, removeManagerAction as any);
 bot.action(/exportApplication/, exportApplication)
-bot.action(/^export_(pdf|excel|csv)$/,exportDocument)
+bot.action(/^export_(excel|csv)$/,exportDocument)
 
 bot.on("text", messageHandle);
 export default bot;
