@@ -10,6 +10,7 @@ import { edit } from "../keyboards/edit";
 import { managerInlineKeyBoard } from "../keyboards/managers";
 import { subscribeMurkap } from "../keyboards/subscribe";
 import newManager from "./addManager";
+import getStatistiacManager from "./getTariffManager";
 import notificationMessageEvent from "./notification";
 import { replyMessag } from "./onReply";
 import getRatingManager from "./ratingManagers";
@@ -179,6 +180,10 @@ ${user_pay.allowedFields.map((item) => `✓ ${item}`).join("\n")}
         "👥 Управление аналитикой!\nЧто делаем?",
         analiticsMurkup.first
       );
+      break;
+
+    case "📊 Статистика":
+      getStatistiacManager(ctx);
       break;
 
     case "📋 Заявки":

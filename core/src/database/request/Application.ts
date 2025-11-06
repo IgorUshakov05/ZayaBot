@@ -725,7 +725,7 @@ export async function get_all_application_and_month_rating({
           path: "applications",
           match: {
             status: Status.complete,
-            updatedAt: { $gte: monthStart, $lt: monthEnd },
+            updatedAt: { $gte: monthStart, $lte: monthEnd },
           },
           populate: {
             path: "manager",
@@ -745,7 +745,7 @@ export async function get_all_application_and_month_rating({
 
     const allCountApplication = await Application.countDocuments({
       company: user.company._id,
-      updatedAt: { $gte: monthStart, $lt: monthEnd },
+      updatedAt: { $gte: monthStart, $lte: monthEnd },
     });
 
     const monthApplications = user.company.applications ?? [];
@@ -788,3 +788,67 @@ export async function get_all_application_and_month_rating({
     return { success: false, message: "Произошла ошибка. Попробуйте позже." };
   }
 }
+
+export async function get_statistic_manager({
+  chat_id,
+}: {
+  chat_id: number;
+}): Promise<
+  | { success: false; message: string }
+  | {
+      success: true;
+      allCompliteApplications: number;
+      monthCompliteApplications: number;
+    }
+> {
+  try {
+    const user = await User.findOne({
+      chat_id,
+    }).select("company role _id");
+
+    if (!user) {
+      return { success: false, message: "❌ Вас нет в системе!" };
+    }
+
+    if (user.role !== Role.manager) {
+      return {
+        success: false,
+        message: "❌ Функция доступна только менеджеру",
+      };
+    }
+
+    if (!user.company) {
+      return { success: false, message: "❌ У вас нет компании!" };
+    }
+    const monthStart = startOfMonth(new Date());
+    const monthEnd = endOfMonth(new Date());
+
+    const [allCompliteApplications, monthCompliteApplications] =
+      await Promise.all([
+        Application.countDocuments({
+          company: user.company,
+          manager: user._id,
+          status: Status.complete,
+        }),
+        Application.countDocuments({
+          company: user.company,
+          manager: user._id,
+          status: Status.complete,
+          updatedAt: { $gte: monthStart, $lte: monthEnd },
+        }),
+      ]);
+    return {
+      success: true,
+      allCompliteApplications,
+      monthCompliteApplications,
+    };
+  } catch (error) {
+    console.error("Ошибка в get_all_application_and_month_rating:", error);
+    return { success: false, message: "Произошла ошибка. Попробуйте позже." };
+  }
+}
+
+(async () => {
+  let x = await get_statistic_manager({ chat_id: 7814047057 });
+  console.log(x);
+})();
