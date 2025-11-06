@@ -110,7 +110,7 @@
 
 ## Технологии
 
-- **Telegram Bot API**
+- **Telegraf**
 - **Node.js + TypeScript**
 - **Express** 
 - **Mongodb** 
