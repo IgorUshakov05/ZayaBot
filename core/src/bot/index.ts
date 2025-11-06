@@ -12,6 +12,7 @@ import registrationWizard from "./scenes/registationComapny";
 import registrationUser from "./scenes/registrationUser";
 import topupBalanceWizard from "./scenes/topUpBalance";
 import editUserWizard from "./scenes/editUser";
+import editManagerFullnameWizard from "./scenes/editManager";
 
 import removeTextCompany from "./action/removeCompany";
 import topupBalance from "./action/topup_balance";
@@ -31,6 +32,7 @@ type MyContext = Scenes.WizardContext;
 const bot = new Telegraf<MyContext>(config.BOT_TOKEN);
 const stage = new Scenes.Stage<MyContext>([
   registrationWizard,
+  editManagerFullnameWizard,
   registrationUser,
   toggleTariffWizard,
   topupBalanceWizard,

@@ -11,6 +11,7 @@ import { Code } from "../schema/CodeSchema";
 import { User } from "../schema/UserSchema";
 import { Company } from "../schema/CompanySchema";
 import { toTitleCase } from "../../bot/global/toTitleCase";
+import conf from "../../config/config";
 
 export const createUser = async ({
   surname,
@@ -232,6 +233,84 @@ export const editUser = async ({
   }
 };
 
+export const editManager = async ({
+  user_id,
+  surname,
+  name,
+}: {
+  user_id: string;
+  surname: string;
+  name: string;
+}): Promise<
+  | { success: false; message: string }
+  | { success: true; surname: string; name: string }
+> => {
+  try {
+    if (!user_id || !surname?.trim() || !name?.trim()) {
+      return {
+        success: false,
+        message: "❌ Пожалуйста, заполни все поля: имя и фамилия",
+      };
+    }
+
+    if (surname.length > 50 || name.length > 50) {
+      return {
+        success: false,
+        message: "❌ Имя и фамилия не должны превышать 50 символов",
+      };
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: user_id },
+      {
+        $set: {
+          name: name.trim(),
+          surname: surname.trim(),
+          updatedAt: new Date(),
+        },
+      },
+      {
+        runValidators: true,
+      }
+    );
+
+    if (!updatedUser) {
+      return {
+        success: false,
+        message:
+          "❌ Ты еще не зарегистрирован в системе! Используй команду /start",
+      };
+    }
+
+    return {
+      success: true,
+      surname: updatedUser.surname as string,
+      name: updatedUser.name,
+    };
+  } catch (error: any) {
+    console.error("Ошибка при обновлении пользователя:", error);
+
+    if (error.name === "ValidationError") {
+      return {
+        success: false,
+        message: "❌ Проверь правильность введенных данных",
+      };
+    }
+
+    if (error.name === "CastError") {
+      return {
+        success: false,
+        message: "❌ Неверный формат данных",
+      };
+    }
+
+    return {
+      success: false,
+      message: "😔 Произошла ошибка. Попробуй еще раз позже",
+    };
+  }
+};
+
 export const upBalanceUser = async ({
   chat_id,
   amount,
@@ -259,6 +338,31 @@ export const upBalanceUser = async ({
         `💰 *Баланс успешно пополнен!*\n\n` +
         `➕ Пополнено: ${amount} ₽\n` +
         `💎 Текущий баланс: ${user.balance} ₽`,
+    };
+  } catch (error) {
+    console.error("Ошибка при обновлении баланса:", error);
+    return { success: false, message: "Ошибка сервера при обновлении баланса" };
+  }
+};
+
+export const downBalanceUser = async ({
+  chat_id,
+}: {
+  chat_id: number;
+}): Promise<{ success: boolean; message: string }> => {
+  try {
+    const user = await User.findOne({ chat_id });
+
+    if (!user) {
+      return { success: false, message: "Пользователь не найден" };
+    }
+
+    user.balance = (user.balance || 0) - conf.PRICE_PER_REQUEST;
+    await user.save();
+
+    return {
+      success: true,
+      message: "С баланса списано!",
     };
   } catch (error) {
     console.error("Ошибка при обновлении баланса:", error);

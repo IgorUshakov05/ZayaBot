@@ -9,7 +9,7 @@ import { applicationMurkup } from "../keyboards/application";
  * @param size   размер чанка (по умолчанию 5)
  * @returns      массив чанков
  */
-function chunk<T>(arr: T[], size: number = 5): T[][] {
+function chunk<T>(arr: T[], size: number = 10): T[][] {
   const result: T[][] = [];
 
   for (let i = 0; i < arr.length; i += size) {
@@ -28,17 +28,19 @@ export default async function getAllApplication(
     let chanks = await chunk(applications.applications);
 
     chanks.forEach((chunk, index) => {
-      let message = chunk
-        .map((application) => buildApplicationMessage(application))
-        .join("");
+      setTimeout(() => {
+        let message = chunk
+          .map((application) => buildApplicationMessage(application))
+          .join("");
 
-      ctx.reply(message, {
-        parse_mode: "HTML",
-        reply_markup:
-          index === chanks.length - 1
-            ? applicationMurkup.export.reply_markup
-            : undefined,
-      });
+        ctx.reply(message, {
+          parse_mode: "HTML",
+          reply_markup:
+            index === chanks.length - 1
+              ? applicationMurkup.export.reply_markup
+              : undefined,
+        });
+      }, index * 100);
     });
   } catch (error) {
     console.error("getAllApplication", error);

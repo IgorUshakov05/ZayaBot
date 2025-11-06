@@ -1,6 +1,7 @@
 // utils/exportExcel.ts
 import ExcelJS from "exceljs";
 import IApplication, { Status } from "../../types/ApplicationSchema";
+import { toTitleCase } from "../global/toTitleCase";
 
 export async function exportApplicationsToExcel(
   applications: IApplication[]
@@ -37,9 +38,14 @@ export async function exportApplicationsToExcel(
   }
 
   applications.forEach((app: any) => {
-    const managerName = app.manager
-      ? `${app.manager.name || ""} ${app.manager.surname || ""}`.trim() || "—"
-      : "—";
+    const managerName =
+      app.status === Status.complete && !app.manager
+        ? "Удаленный менеджер"
+        : app.manager
+        ? `${toTitleCase(app.manager.name) || ""} ${
+            toTitleCase(app.manager.surname) || ""
+          }`.trim() || "—"
+        : "—";
 
     const status =
       app.status === Status.complete

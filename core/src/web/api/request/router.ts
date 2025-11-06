@@ -13,6 +13,8 @@ import { sendTestMessage } from "../../../bot/global/testRequest";
 import { create_application } from "../../../database/request/Application";
 import { checkTariff } from "../../validator/checkTariff";
 import { sendMessageTarriffError } from "../../../bot/global/messageTariffError";
+import { PaymentType } from "../../../types/UserSchema";
+import { downBalanceUser } from "../../../database/request/User";
 
 const requestRouter = Router();
 
@@ -110,6 +112,7 @@ requestRouter.post(
         });
       }
       if ("chat_ids" in data && data.chat_ids) {
+        console.log(data.balance, " баланс");
         let check_tariff = await checkTariff({
           application: {
             name,
@@ -154,6 +157,15 @@ requestRouter.post(
           chat_data: send_message.chat_data,
           data: check_tariff.filtredApplication,
         });
+
+        if (data.payment_type === PaymentType.PER_REQUEST) {
+          // Тут я списываю с баланса!
+          let downBalance = await downBalanceUser({
+            chat_id: data.chat_id_director,
+          });
+          console.log(downBalance);
+        }
+
         if (!save_application_with_chat_ids.success) {
           return res.status(500).json({
             success: false,

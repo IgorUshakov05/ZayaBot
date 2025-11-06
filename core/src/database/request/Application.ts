@@ -771,7 +771,7 @@ export async function get_all_application_and_month_rating({
         return {
           name: manager
             ? `${toTitleCase(manager.name)} ${toTitleCase(manager.surname)}`
-            : "Без менеджера",
+            : "Без менеджера (удаленного)",
           user_tag: manager?.user_tag ? `@${manager.user_tag}` : null,
           count: apps.length,
         };

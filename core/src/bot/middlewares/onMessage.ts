@@ -181,12 +181,15 @@ ${user_pay.allowedFields.map((item) => `✓ ${item}`).join("\n")}
       );
       break;
 
-
     case "📋 Заявки":
       ctx.reply(
         "📋 Управление заявками!\nЧто делаем?",
         applicationMurkup.first
       );
+      break;
+
+    case "✏️ Редактировать менеджера":
+      ctx.scene.enter("edit_manager_fullname");
       break;
 
     case "🔔 Настроить уведомления":

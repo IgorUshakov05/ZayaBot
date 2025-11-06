@@ -41,14 +41,16 @@ export default async function getRatingManager(
           ? "🥉"
           : `${index + 1}.`;
 
-      message += `${medal} <b>${item.name}</b> ${item.user_tag} — <b>${item.count}</b> (${percent}%)\n`;
+      message += `${medal} <b>${item.name}</b> ${
+        item.user_tag ? item.user_tag : ""
+      } — <b>${item.count}</b> (${percent}%)\n`;
     });
-    
+
     let closet = rating.reduce((sum, item) => sum + item.count, 0);
-    let closetPrecent   =
-        monthCountApplication > 0
-          ? Math.round((closet / monthCountApplication) * 100)
-          : 0
+    let closetPrecent =
+      monthCountApplication > 0
+        ? Math.round((closet / monthCountApplication) * 100)
+        : 0;
     message += `\nЗакрыто: <b>${closet} (${closetPrecent}%)</b>\n`;
 
     await ctx.reply(message, {
