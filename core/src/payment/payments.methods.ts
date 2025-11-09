@@ -6,7 +6,7 @@ export interface PaymentData {
   id: string;
   status: "pending" | "waiting_for_capture" | "succeeded" | "canceled";
   amount: {
-    value: string; // значение суммы в строке, т.к. API возвращает строку
+    value: string; 
     currency: "RUB" | "USD" | "EUR";
   };
   description: string;
@@ -14,7 +14,7 @@ export interface PaymentData {
     account_id: string;
     gateway_id: string;
   };
-  created_at: string; // ISO-строка даты
+  created_at: string; 
   confirmation: {
     type: "redirect";
     confirmation_url: string;
@@ -24,7 +24,7 @@ export interface PaymentData {
   refundable: boolean;
   metadata?: {
     chat_id?: string | number;
-    [key: string]: any; // если в будущем будут другие кастомные поля
+    [key: string]: any; 
   };
 }
 

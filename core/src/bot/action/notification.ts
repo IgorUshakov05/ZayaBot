@@ -5,6 +5,7 @@ import { start } from "../keyboards/start";
 const notificationAction = async (ctx: any) => {
   const state: "on" | "off" = ctx.match[1];
   const newState: boolean = state === "on";
+  ctx.deleteMessage()
   let message = newState
     ? "✅ Теперь вы будете получать уведомления о новых заявках."
     : "❌ Вы больше не будете получать уведомления о новых заявках.";

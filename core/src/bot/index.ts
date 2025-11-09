@@ -25,6 +25,8 @@ import finishApplicationAction from "./action/finish.application";
 import exportApplication from "./action/exportApplication";
 import removeManagerAction from "./action/removeManager";
 import exportDocument from "./action/exportDocument";
+import disabledAutoPayCancel from "./action/disableAutoPayCancel";
+import disabledAutoPayConfirm from "./action/disableAutoPayConfirm";
 
 // Типизация контекста для Wizard
 type MyContext = Scenes.WizardContext;
@@ -45,14 +47,16 @@ bot.start(command_start);
 // Экшены
 bot.action("remove_test_company", removeTextCompany);
 bot.action("topup_balance", topupBalance);
+bot.action("exportApplication", exportApplication);
+bot.action("disable_auto_pay_cancel", disabledAutoPayCancel);
+bot.action("disable_auto_pay_confirm", disabledAutoPayConfirm as any);
 bot.action(/^tariff_(.+)$/, tariffBalance);
 bot.action(/^notification_(off|on)$/, notificationAction);
 bot.action(/^inwork_(\d+)/, inWorkAction as any);
 bot.action(/^cancel_(\d+)/, cancelApplicationAction);
 bot.action(/^finish_(\d+)/, finishApplicationAction);
 bot.action(/^removemanager_(\d+)/, removeManagerAction as any);
-bot.action(/exportApplication/, exportApplication)
-bot.action(/^export_(excel|csv)$/,exportDocument)
+bot.action(/^export_(excel|csv)$/, exportDocument);
 
 bot.on("text", messageHandle);
 export default bot;

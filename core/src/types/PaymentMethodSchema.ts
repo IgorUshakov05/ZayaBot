@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 export enum PaymentMethodType {
   bank_card = "bank_card",
   yoo_money = "yoo_money",
@@ -9,6 +11,7 @@ export enum PaymentMethodType {
 }
 
 export default interface IPaymentMethod {
+  _id: Types.ObjectId;
   id: string; // payment_method.id из ЮKassa
   payment_method_id: string; // Для автоплатежа айдишка
   type: PaymentMethodType; // тип метода оплаты

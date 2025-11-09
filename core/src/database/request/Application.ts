@@ -847,8 +847,3 @@ export async function get_statistic_manager({
     return { success: false, message: "Произошла ошибка. Попробуйте позже." };
   }
 }
-
-(async () => {
-  let x = await get_statistic_manager({ chat_id: 7814047057 });
-  console.log(x);
-})();

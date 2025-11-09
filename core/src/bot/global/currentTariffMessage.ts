@@ -1,5 +1,9 @@
 import conf from "../../config/config";
+import { IPayment } from "../../types/PaymentShcema";
 import { PaymentType, PaymentPlan } from "../../types/UserSchema";
+import { userTariffAction } from "../action/user.tariff";
+import { addMonths, parseISO } from "date-fns";
+import { formatHuman } from "./formatHuman";
 
 type CURRENT_MESSAGE_RETURN = {
   [PaymentType.SUBSCRIPTION]: {
@@ -10,43 +14,69 @@ type CURRENT_MESSAGE_RETURN = {
   };
   [PaymentType.PER_REQUEST]: string;
 };
-const CURRENT_MESSAGE = ({
+export const CURRENT_MESSAGE = ({
   Type,
   Plan,
-  Start
+  LastPayment,
 }: {
   Type: PaymentType;
   Plan: PaymentPlan;
-  Start: Date
+  LastPayment: IPayment | undefined;
 }): string => {
+  let user_pay = userTariffAction({
+    payment_plan: Plan,
+    payment_type: Type,
+  });
+  let expirationDate;
+  let humanDate;
+  if (!!LastPayment) {
+    expirationDate = addMonths(new Date(LastPayment.createdAt), 1);
+    humanDate = formatHuman(new Date(expirationDate));
+  }
   const messages = {
     [PaymentType.SUBSCRIPTION]: {
       [PaymentPlan.FREE]: `💰 Ваш текущий тариф: FREE  
 
-📅 Действует до: 10.10.2025  
-📊 Лимит: 10 заявок/месяц  
-
-🎯 Доступные поля:  
-🔹 Имя  
-🔹 Телефон  
-👥 В системе: 1 менеджер`,
-      [PaymentPlan.START]: "Стартовый тариф: расширенные возможности",
-      [PaymentPlan.PRO]: "Профессиональный тариф: полный функционал",
-      [PaymentPlan.ENTERPRISE]: "Корпоративный тариф: премиум решения",
-    },
-    [PaymentType.PER_REQUEST]: `💰 Текущий тариф: Плата за заявку
-📅 Действует до: 10.10.2025
-📊 Лимит: Заявка / ${conf.PRICE_PER_REQUEST}₽
+📊 Лимит: ${user_pay.limit} заявок/месяц
 
 🎯 Доступные поля:
-🔹 Имя
-🔹 Телефон
-🔹 Почта
-🔹 Адрес
-🔹 Сообщение
-🔹 Компания
-🔹 Файл
-👥 1 менеджер(ов) в системе
+${user_pay.allowedFields.map((item) => `🔹 ${item}`).join("\n")}
+👥 ${user_pay.managers} менеджер(ов) в системе`,
+
+      [PaymentPlan.START]: `<b>START: расширенные возможности</b>
+
+📊 Лимит: ${user_pay.limit} заявок/месяц
+💸 Следующий платеж: <b>${humanDate}</b>
+
+<b>🎯 Доступные поля:</b>
+${user_pay.allowedFields.map((item) => `🔹 ${item}`).join("\n")}
+👥 ${user_pay.managers} менеджер(ов) в системе
+`,
+      [PaymentPlan.PRO]: `<b>PRO: полный функционал</b>
+
+📊 Лимит: ${user_pay.limit} заявок/месяц
+💸 Следующий платеж: <b>${humanDate}</b>
+
+<b>🎯 Доступные поля:</b>
+${user_pay.allowedFields.map((item) => `🔹 ${item}`).join("\n")}
+👥 ${user_pay.managers} менеджер(ов) в системе
+`,
+      [PaymentPlan.ENTERPRISE]: `<b>ENTERPRISE: премиум решения</b>
+
+📊 Лимит: ${user_pay.limit} заявок/месяц
+💸 Следующий платеж: <b>${humanDate}</b>
+
+<b>🎯 Доступные поля:</b>
+${user_pay.allowedFields.map((item) => `🔹 ${item}`).join("\n")}
+👥 ${user_pay.managers} менеджер(ов) в системе`,
+    },
+    [PaymentType.PER_REQUEST]: `<b>💰 Текущий тариф: Плата за заявку</b>
+
+📊 Лимит: Заявка / ${conf.PRICE_PER_REQUEST}₽
+
+<b>🎯 Доступные поля:</b>
+${user_pay.allowedFields.map((item) => `🔹 ${item}`).join("\n")}
+👥 ${user_pay.managers} менеджер(ов) в системе
 `,
   } as CURRENT_MESSAGE_RETURN;
 
@@ -56,4 +86,3 @@ const CURRENT_MESSAGE = ({
 
   return messages[PaymentType.PER_REQUEST];
 };
-

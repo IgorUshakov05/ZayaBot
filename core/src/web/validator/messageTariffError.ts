@@ -17,13 +17,12 @@ export const tariffMessages = {
 • 1 менеджер в системе
 
 💡 <b>Рекомендации:</b>
-• Удалите неактуальные заявки
 • Перейдите на тариф Start (50 заявок)
 • Или дождитесь сброса 1 числа
 
 🔄 <b>Сброс счетчика:</b> через ${daysUntilReset} дней
 
-📞 <b>Контакты:</b> @support`,
+📞 <b>Контакты:</b> @O101O1O1O`,
 
   start: (
     currentCount: number,
@@ -46,7 +45,7 @@ export const tariffMessages = {
 
 🔄 <b>Сброс счетчика:</b> через ${daysUntilReset} дней
 
-📞 <b>Помощь:</b> @support`,
+📞 <b>Помощь:</b> @O101O1O1O`,
 
   pro: (
     currentCount: number,
@@ -63,9 +62,7 @@ export const tariffMessages = {
 • До 10 менеджеров
 
 💡 <b>Что делать:</b>
-• Очистите архив заявок
 • Перейдите на Enterprise (безлимит)
-• Оптимизируйте workflow
 
 🏆 <b>Enterprise включает:</b>
 • Безлимитные заявки
@@ -74,7 +71,7 @@ export const tariffMessages = {
 
 🔄 <b>Сброс счетчика:</b> через ${daysUntilReset} дней
 
-📞 <b>Консультация:</b> @sales_manager`,
+📞 <b>Консультация:</b> @O101O1O1O`,
 
   per_request: (balance: number) => `🔔 Новая заявка
 

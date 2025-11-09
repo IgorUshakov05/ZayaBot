@@ -6,6 +6,8 @@ import { ICompanySchema } from "../../types/CompanySchema";
 import IUser, { PaymentPlan, PaymentType, Role } from "../../types/UserSchema";
 import IApplication, { Status } from "../../types/ApplicationSchema";
 import { Application } from "../schema/ApplicationSchema";
+import { get_last_payment } from "./Payment";
+import { addMonths } from "date-fns";
 
 interface CreateCompanyParams {
   user: { user_tag: string; chat_id: number; name: string };
@@ -297,11 +299,6 @@ export async function delete_company({
  * @param {Object} params - Параметры запроса.
  * @param {string} params.api_key - Уникальный API-ключ компании.
  * @param {string} params.domain - Домен компании.
- *
- * @returns {Promise<
- *   | { success: false; message: string }
- *   | { success: true; chat_ids: { role: Role; chat_id: number }[] }
- * >}
  */
 export async function get_data_company_and_director({
   api_key,
@@ -315,7 +312,6 @@ export async function get_data_company_and_director({
       success: true;
       chat_ids: { role: Role; chat_id: number }[];
       count: number;
-
       payment_type: PaymentType;
       payment_plan: PaymentPlan;
       countApplicationInMounth: number;
@@ -350,10 +346,49 @@ export async function get_data_company_and_director({
     }
     const applications = company.applications as unknown as IApplication[];
     const countApplication = applications.length;
+    let countApplicationInMounth: number;
 
-    const countApplicationInMounth = applications.filter(
-      (app) => new Date(app.createdAt).getMonth() === new Date().getMonth()
-    ).length;
+    const now = new Date();
+
+    // Если тариф на подписках
+    if (director.payment_type === PaymentType.SUBSCRIPTION) {
+      {
+        // На бесплатный тарифф
+        if (director.payment_plan === PaymentPlan.FREE) {
+          // Он работате от первого числа месяца по последнее число
+          const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+          countApplicationInMounth = applications.filter((app) => {
+            const appDate = new Date(app.createdAt);
+            return appDate >= monthStart;
+          }).length;
+        } else {
+          // За старт берется число последнего платежа
+          const lastPayResult = await get_last_payment({
+            chat_id: director.chat_id,
+          });
+          if (!lastPayResult.success)
+            return { success: false, error_message: lastPayResult.message };
+          const lastPay = lastPayResult.payment;
+          const payDate = new Date(lastPay.createdAt);
+          // Считаем число след месяца + 1 мес
+          const payEnd = addMonths(payDate, 1);
+          // Делаем выборку от дня первого платежа, по след месяц
+          countApplicationInMounth = applications.filter((app) => {
+            const appDate = new Date(app.createdAt);
+            return appDate >= payDate && appDate < payEnd;
+          }).length;
+        }
+      }
+    }
+    // Если тарифф по заявке
+    else {
+      // Считаем начало ТЕКУЩЕГО месяца
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      countApplicationInMounth = applications.filter((app) => {
+        const appDate = new Date(app.createdAt);
+        return appDate >= monthStart;
+      }).length;
+    }
 
     const chat_ids = users
       .filter((user) => user.mute === false)
@@ -385,3 +420,11 @@ export async function get_data_company_and_director({
     };
   }
 }
+
+// (async () => {
+//   let x = await get_data_company_and_director({
+//     domain: "vk.com",
+//     api_key: "08436693-28b7-4a27-a548-c947f49d52ad",
+//   });
+//   console.log(x);
+// })();

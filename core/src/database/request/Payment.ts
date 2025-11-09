@@ -44,3 +44,40 @@ export const create_payment = async ({
     };
   }
 };
+
+export const get_last_payment = async ({
+  chat_id,
+}: {
+  chat_id: number;
+}): Promise<
+  { success: true; payment: IPayment } | { success: false; message: string }
+> => {
+  try {
+    const director = await User.findOne({ chat_id })
+      .populate<{
+        payments: IPayment[];
+      }>({
+        path: "payments",
+        options: { sort: { createdAt: -1 }, limit: 1 },
+      })
+      .lean()
+      .exec();
+
+    if (!director) {
+      return { success: false, message: "Director not found" };
+    }
+    if (!director.payments || director.payments.length === 0) {
+      return { success: false, message: "No payments found" };
+    }
+
+    const lastPayment = director.payments[0];
+
+    return {
+      success: true,
+      payment: lastPayment,
+    };
+  } catch (error) {
+    console.error("Error in get_last_payment:", error);
+    return { success: false, message: "Server error" };
+  }
+};

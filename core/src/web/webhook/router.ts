@@ -3,7 +3,7 @@ import { YooKassaWebhookBody } from "../../types/Yookassa";
 import { setTariff, upBalanceUser } from "../../database/request/User";
 import bot from "../../bot";
 import { start } from "../../bot/keyboards/start";
-import { create_payment_method } from "../../database/request/PaymentMethod";
+import { create_or_updata_payment_method } from "../../database/request/PaymentMethod";
 import { create_payment } from "../../database/request/Payment";
 import { PaymentType } from "../../types/UserSchema";
 const router = Router();
@@ -22,7 +22,7 @@ router.post("/webhook/yookassa", async (req: Request, res: Response) => {
       if (!balanse.success) {
         throw Error(balanse.message);
       }
-      await create_payment_method({
+      await create_or_updata_payment_method({
         chat_id: data.object.metadata.chat_id,
         payment_method_id: data.object.payment_method.id,
         saved: data.object.payment_method.saved,
@@ -54,7 +54,7 @@ router.post("/webhook/yookassa", async (req: Request, res: Response) => {
       if (!newTariff.success) {
         throw Error(newTariff.message);
       }
-      await create_payment_method({
+      await create_or_updata_payment_method({
         chat_id: data.object.metadata.chat_id,
         payment_method_id: data.object.payment_method.id,
         saved: data.object.payment_method.saved,

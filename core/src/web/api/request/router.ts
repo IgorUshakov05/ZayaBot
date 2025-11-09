@@ -90,6 +90,7 @@ requestRouter.post(
         api_key,
         domain: queryDomain,
       });
+      console.log(data);
 
       if (!data.success) {
         return res

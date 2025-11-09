@@ -1,8 +1,4 @@
 import conf from "../../config/config";
-import { getTariff } from "../../database/request/User";
-import { PaymentPlan, PaymentType } from "../../types/UserSchema";
-import exportApplication from "../action/exportApplication";
-import { userTariffAction } from "../action/user.tariff";
 import command_start from "../command/start";
 import { analiticsMurkup } from "../keyboards/analitics";
 import { applicationMurkup } from "../keyboards/application";
@@ -10,6 +6,7 @@ import { edit } from "../keyboards/edit";
 import { managerInlineKeyBoard } from "../keyboards/managers";
 import { subscribeMurkap } from "../keyboards/subscribe";
 import newManager from "./addManager";
+import { disableAutoPay } from "./disableAutoPay";
 import getStatistiacManager from "./getTariffManager";
 import notificationMessageEvent from "./notification";
 import { replyMessag } from "./onReply";
@@ -17,6 +14,7 @@ import getRatingManager from "./ratingManagers";
 import removeManager from "./removeManager";
 import getAllApplication from "./showAllApplication";
 import statusApplication from "./statusApplication";
+import { subscribe } from "./subscribe";
 
 // Обработчик сообщений
 const messageHandle = async (ctx: any) => {
@@ -64,61 +62,12 @@ const messageHandle = async (ctx: any) => {
       removeManager(ctx);
       break;
 
+    case "🏦 Отключить автопополнение":
+      disableAutoPay(ctx);
+      break;
+
     case "💰 Подписка":
-      let user_tariff = await getTariff({ chat_id: ctx.chat.id });
-      if (!user_tariff.success) return ctx.reply(user_tariff.message);
-      let user_pay = userTariffAction({
-        payment_plan: user_tariff.payment_plan,
-        payment_type: user_tariff.payment_type,
-      });
-
-      await ctx.reply(
-        `💰 <b>Текущий тариф: ${user_pay.title}</b>
-📅 Действует до: 10.10.2025
-📊 Лимит: ${
-          user_tariff.payment_type === PaymentType.PER_REQUEST
-            ? `Заявка / ${conf.PRICE_PER_REQUEST}₽`
-            : `${user_pay.limit} заявок/месяц`
-        }
-
-🎯 <b>Доступные поля:</b>
-${user_pay.allowedFields.map((item) => `✓ ${item}`).join("\n")}
-👥 ${user_pay.managers} менеджер(ов) в системе
-
-📦 <b>Доступные тарифы:</b>
-
-1️⃣ <b>Free</b> - 0₽/мес
-• 10 заявок в месяц
-• Имя, Телефон
-• 1 менеджер
-
-2️⃣ <b>Start</b> - 199₽/мес
-• 50 заявок в месяц
-• <b>Free +</b> Почта, Адрес, Комментарий, Компания
-• До 5 менеджеров
-
-3️⃣ <b>Pro</b> - 499₽/мес
-• 100 заявок в месяц  
-• <b>Start +</b> Загрузка файлов
-• До 10 менеджеров
-
-4️⃣ <b>Enterprise</b> - 1499₽/мес
-• Безлимитные заявки
-• Все функции Pro
-• Приоритетная поддержка
-• Неограниченно менеджеров
-
-💸 <b>Альтернатива:</b> Оплата за заявку
-• ${conf.PRICE_PER_REQUEST} руб. / заявка
-• Без фиксированных лимитов и подписок
-• Только за поступившие заявки
-• 1 менеджер
-• Функции Pro
-
-✨ <b>Попробуйте сейчас:</b> Пополните счёт на 100 руб. и получите 10 заявок.
-Мы заранее уведомим, когда баланс будет подходить к концу.`,
-        { parse_mode: "HTML", ...subscribeMurkap.first }
-      );
+      subscribe(ctx);
       break;
 
     case "📋 Тариф":
@@ -132,7 +81,7 @@ ${user_pay.allowedFields.map((item) => `✓ ${item}`).join("\n")}
 • 1 менеджер
 
 2️⃣ <b>Start</b> - 199₽
-• <b>Free +</b> Почта, Адрес, Комментарий, Компания  
+• <b>Free +</b> Почта, Адрес, Сообщение, Компания  
 • 50 заявок/мес
 • До 5 менеджеров
 
@@ -149,6 +98,7 @@ ${user_pay.allowedFields.map((item) => `✓ ${item}`).join("\n")}
         { parse_mode: "HTML", ...subscribeMurkap.subscribe }
       );
       break;
+
     case "➕ Добавить менеджера":
       newManager(ctx);
       break;

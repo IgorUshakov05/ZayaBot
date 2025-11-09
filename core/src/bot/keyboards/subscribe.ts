@@ -9,6 +9,24 @@ export const subscribeMurkap = {
       ["🏠 Главное меню"],
     ]).resize(true),
   },
+  firstWithAutoPayment: {
+    ...Markup.keyboard([
+      ["📋 Тариф", "💸 Плата за заявку"],
+      ["🏦 Отключить автопополнение"],
+      ["🏠 Главное меню"],
+    ]).resize(true),
+  },
+  disableAutoPay: {
+    ...Markup.inlineKeyboard([
+      [
+        {
+          text: "✅ Да, отключить",
+          callback_data: "disable_auto_pay_confirm",
+        },
+        { text: "❌ Отмена", callback_data: "disable_auto_pay_cancel" },
+      ],
+    ]),
+  },
   subscribe: {
     ...Markup.inlineKeyboard([
       [

@@ -78,7 +78,6 @@ export const checkTariff = ({
   try {
       // Обработка оплаты по запросу
     if (payment_type === PaymentType.PER_REQUEST) {
-      // Проверяем достаточно ли средств на балансе
       if (balance < conf.PRICE_PER_REQUEST) {
         return {
           success: false,
@@ -86,13 +85,11 @@ export const checkTariff = ({
         };
       }
 
-      // Для оплаты по запросу возвращаем все поля заявки
       return { success: true, filtredApplication: application };
     }
     if (payment_type === PaymentType.SUBSCRIPTION) {
       const config = TARIFF_CONFIG[payment_plan];
 
-      // Проверка лимита заявок
       if (countApplicationInMounth >= config.limit) {
         const daysUntilReset = getDaysUntilReset();
         let errorMessage = "";
