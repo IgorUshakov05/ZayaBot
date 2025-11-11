@@ -12,15 +12,15 @@ export enum PaymentMethodType {
 
 export default interface IPaymentMethod {
   _id: Types.ObjectId;
-  id: string; // payment_method.id из ЮKassa
-  payment_method_id: string; // Для автоплатежа айдишка
-  type: PaymentMethodType; // тип метода оплаты
+  id: string; 
+  payment_method_id: string;
+  type: PaymentMethodType;
   saved: boolean; // Автоплатеж
-
+  user: Types.ObjectId,
   card?: {
     first6?: string;
     last4?: string;
-    card_type?: string; // Mir
+    card_type?: string; 
   };
 
   createdAt: Date;

@@ -16,17 +16,17 @@
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.6.2",
     "@types/uuid": "^10.0.0",
-    "express": "^5.1.0",
-    "morgan": "^1.10.1",
-    "nodemon": "^3.1.10",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
-    "uuid": "^8.3.2"
-  },
-  "dependencies": {
     "@types/cors": "^2.8.19",
     "@types/express-validator": "^2.20.33",
     "@types/multer": "^2.0.0",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "uuid": "^8.3.2",
+    "express": "^5.1.0",
+    "morgan": "^1.10.1",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "exceljs": "^4.4.0",

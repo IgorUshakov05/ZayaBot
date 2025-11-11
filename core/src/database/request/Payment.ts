@@ -66,9 +66,6 @@ export const get_last_payment = async ({
     if (!director) {
       return { success: false, message: "Director not found" };
     }
-    if (!director.payments || director.payments.length === 0) {
-      return { success: false, message: "No payments found" };
-    }
 
     const lastPayment = director.payments[0];
 

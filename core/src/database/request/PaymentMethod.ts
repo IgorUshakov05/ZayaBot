@@ -60,6 +60,7 @@ export const create_or_updata_payment_method = async ({
       saved,
       type,
       card,
+      user: user._id,
     });
 
     user.payment_method = new_payment_method._id;

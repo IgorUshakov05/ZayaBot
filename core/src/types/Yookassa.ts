@@ -48,10 +48,11 @@ export interface YooKassaWebhookBody {
     paid: boolean;
     refundable: boolean;
 
-    /** Данные, которые ты передаёшь при создании платежа */
+    /** Данные, при создании платежа */
     metadata: {
       chat_id: number;
       paymentType: PaymentType;
+      isAutoPay: string;
       paymentPlan: PaymentPlan;
       [key: string]: any;
     };

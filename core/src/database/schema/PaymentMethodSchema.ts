@@ -11,6 +11,7 @@ const PaymentMethodSchema = new Schema<IPaymentMethod>(
       required: true,
       default: () => uuidv4(),
     },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
 
     payment_method_id: {
       type: String,

@@ -6,7 +6,7 @@ export interface PaymentData {
   id: string;
   status: "pending" | "waiting_for_capture" | "succeeded" | "canceled";
   amount: {
-    value: string; 
+    value: string;
     currency: "RUB" | "USD" | "EUR";
   };
   description: string;
@@ -14,7 +14,7 @@ export interface PaymentData {
     account_id: string;
     gateway_id: string;
   };
-  created_at: string; 
+  created_at: string;
   confirmation: {
     type: "redirect";
     confirmation_url: string;
@@ -24,7 +24,7 @@ export interface PaymentData {
   refundable: boolean;
   metadata?: {
     chat_id?: string | number;
-    [key: string]: any; 
+    [key: string]: any;
   };
 }
 
@@ -62,7 +62,7 @@ export const create_pay = async (
           return_url: "https://t.me/zaya_crm_bot",
         },
         description: `Пополнение баланса на ${amount} руб.`,
-        metadata: { chat_id, paymentType, paymentPlan },
+        metadata: { chat_id, paymentType, paymentPlan, isAutoPay: false },
       },
       {
         auth: {
