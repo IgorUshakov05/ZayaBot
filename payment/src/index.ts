@@ -26,6 +26,7 @@ async function processPayments() {
     // За 1 день до оплаты
     console.log("🔔 Уведомление за 1 день до оплаты");
     let oneDay = await get_user_payment_methods(1);
+
     if (oneDay.success && oneDay.payments.length > 0) {
       await sendMessageUsersWithRateLimit(oneDay.payments, 1);
     }

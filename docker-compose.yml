@@ -1,0 +1,49 @@
+services:
+  mongo:
+    image: mongo:6.0-jammy
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: zayabot
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-network
+
+  payment:
+    container_name: payment_servise
+    build: ./payment  
+    image: igorushakov111/payment_servise:latest
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    env_file:
+      - ./payment/.env
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
+
+  core:
+    container_name: core_servise
+    build: ./core   
+    image: igorushakov111/core_servise:latest
+    ports:
+      - "4001:4001"
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    env_file:
+      - ./core/.env
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
+
+volumes:
+  mongo_data:
+
+networks:
+  app-network:
+    driver: bridge
