@@ -1,6 +1,7 @@
 import { model, Schema } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
-import IPaymentMethod, {
+import {
+  IPaymentMethod,
   PaymentMethodType,
 } from "../../types/PaymentMethodSchema";
 

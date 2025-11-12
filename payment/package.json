@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --watch \"src/**/*.ts\" --exec ts-node src/index.ts",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js"
   },
   "author": "",
@@ -25,6 +25,7 @@
     "dotenv": "^17.2.3",
     "mongoose": "^8.19.3",
     "morgan": "^1.10.1",
+    "node-cron": "^4.2.1",
     "uuid": "^8.3.2"
   }
 }

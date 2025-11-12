@@ -3,8 +3,10 @@ import conf from "../config/config";
 
 export const connectDB = async () => {
   try {
-    await mongoose.connect(conf.DATABASE_URI);
+    let connectionString =
+      conf.MODE === "DEV" ? conf.DATABASE_URI_DEV : conf.DATABASE_URI_PROD;
+    await mongoose.connect(connectionString);
   } catch (err) {
-    console.error("MongoDB connection error:", err);
+    throw Error("Ошибка при подключении к бд");
   }
 };
