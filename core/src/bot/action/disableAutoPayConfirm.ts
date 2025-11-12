@@ -9,6 +9,8 @@ import { start } from "../keyboards/start";
 export default async function disabledAutoPayConfirm(
   ctx: Context & { chat: { id: number } }
 ) {
+  await ctx.answerCbQuery("🔄 Обрабатываю запрос...");
+
   let chat_id = ctx.chat.id;
   await ctx.deleteMessage();
   let paymentMethod = await get_payment_method_info({ chat_id });

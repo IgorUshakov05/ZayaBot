@@ -4,6 +4,7 @@ import { start } from "../keyboards/start";
 
 const notificationAction = async (ctx: any) => {
   const state: "on" | "off" = ctx.match[1];
+  ctx.answerCbQuery();
   const newState: boolean = state === "on";
   ctx.deleteMessage()
   let message = newState

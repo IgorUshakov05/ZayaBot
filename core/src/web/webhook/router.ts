@@ -63,7 +63,7 @@ router.post("/webhook/yookassa", async (req: Request, res: Response) => {
           amount: data.object.amount,
           chat_id: data.object.metadata.chat_id,
           paid: data.object.paid,
-          isAuto: data.object.payment_method.saved,
+          isAuto: isAutoPay,
           status: data.object.status,
         });
 
@@ -133,8 +133,6 @@ router.post("/webhook/yookassa", async (req: Request, res: Response) => {
 
 <i>Пожалуйста, проверьте данные вашей карты 
 или обратитесь в поддержку банка.</i>
-
-Мы повторим попытку через 24 часа.
 `,
           {
             parse_mode: "HTML",
