@@ -1,47 +1,45 @@
-import axios from "axios";
-import conf from "../../config/config";
+import { PaymentPlan, PricePlan } from "../../types/UserSchema";
 
-export interface SendMessageParams {
-  chat_id: number;
-  text: string;
-  parse_mode?: "HTML" | "Markdown" | "MarkdownV2";
-  reply_markup?: any;
-}
-export default async function subscriptionMessageSender(
-  params: SendMessageParams
-) {
-  try {
-    const response = await axios.post(
-      `https://api.telegram.org/bot${conf.BOT_TOKEN}/sendMessage`,
-      params
-    );
-
-    return response.data.ok;
-  } catch (error) {
-    console.error("Ошибка отправки сообщения в Telegram:", error);
-    return false;
-  }
-}
-
-export const sendRenewalReminder = async (
-  userChatId: number,
-  daysUntilRenewal: number
-) => {
-  const messages = {
-    1: `🔔 Напоминание: Ваша подписка будет продлена <b>завтра</b>`,
-    2: `🔔 Напоминание: Ваша подписка будет продлена <b>послезавтра</b>`,
-    3: `🔔 Напоминание: До продления подписки осталось <b>3 дня</b>`,
+// С автоплатежом
+export function willBeAutoPay(day: 1 | 2, amount: number) {
+  let days = {
+    1: "<b>⚠️ Автопродление уже завтра!</b> 📅",
+    2: "<b>⚠️ Автопродление через 2 дня!</b> 📅",
   };
+  let message = `${days[day]}
+    
+С вашего счёта будет списано <b>${amount}₽</b>.
+<i>Автооплата активна — всё под контролем! 🔒</i>
+  `;
+  return message;
+}
+// Без автоплатежа
+export function NotWillBeAutoPay(day: 1 | 2) {
+  let days = {
+    1: "<b>⚠️ Подписка истекает завтра!</b> 📅",
+    2: "<b>⚠️ Подписка истекает через 2 дня!</b> 📅",
+  };
+  let message = `${days[day]}
 
-  const text =
-    messages[daysUntilRenewal as keyof typeof messages] ||
-    `🔔 Напоминание: До продления подписки осталось ${daysUntilRenewal} дней`;
+Продлите тариф, чтобы продолжать работу с заявками <b>без перерывов</b>! 🌟
+<i>Или включите автоплатёж при следующей оплате — больше не придётся следить за сроками! 🔄</i>
+  `;
+  return message;
+}
 
-  const success = await subscriptionMessageSender({
-    chat_id: userChatId,
-    text: text,
-    parse_mode: "HTML",
-  });
+export function AutoPayNotAllowed() {
+  let message = `
+<b>📅 Подписка приостановлена. <i>Теперь ваш тариф FREE</i></b>
 
-  return success;
-};
+Ваша подписка завершилась, так как вы не включили автопродление при оплате.
+
+<b>Чтобы возобновить работу:</b>
+• Перейдите в раздел "Подписка"
+• Перейдите в раздел "Тариф"
+• Выберите подходящий план
+• <b>Не забудьте включить автопродление</b> 🔄
+
+С автопродлением вам не придется следить за сроками — система все сделает за вас! 🤖
+  `.trim();
+  return message;
+}

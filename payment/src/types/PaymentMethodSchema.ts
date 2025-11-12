@@ -11,7 +11,7 @@ export enum PaymentMethodType {
   sbp = "sbp",
 }
 
-export default interface IPaymentMethod {
+export interface IPaymentMethod {
   _id: Types.ObjectId;
   id: string;
   payment_method_id: string;

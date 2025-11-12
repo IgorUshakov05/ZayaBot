@@ -1,7 +1,7 @@
 import { connectDB } from "./database";
 import { get_user_payment_methods } from "./database/request/PaymentMethod";
-import { sendRenewalReminder } from "./telegram/messages/subscriptionMessageSender";
-import { IPayment } from "./types/PaymentShcema";
+import { sendMessageUsersWithRateLimit } from "./telegram/spam";
+import payUsers from "./payment/payUsers";
 
 const start = () => {
   connectDB();
@@ -9,17 +9,18 @@ const start = () => {
 start();
 (async () => {
   {
-    console.log("Завтра");
-    let x = await get_user_payment_methods(1);
+    let x = await get_user_payment_methods(2);
     if (!x.success) return;
-    x.payments.forEach((payment: any) => console.log(payment.user.chat_id));
-    // console.log(x);
+    await sendMessageUsersWithRateLimit(x.payments, 2);
   }
   {
-    console.log("Сегодня");
+    let x = await get_user_payment_methods(1);
+    if (!x.success) return;
+    await sendMessageUsersWithRateLimit(x.payments, 1);
+  }
+  {
     let x = await get_user_payment_methods(0);
     if (!x.success) return;
-    x.payments.forEach((payment: any) => console.log(payment.user.chat_id));
-    console.log(x);
+    await payUsers(x.payments);
   }
 })();

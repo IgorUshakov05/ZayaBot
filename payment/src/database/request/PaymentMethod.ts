@@ -1,4 +1,4 @@
-import IPaymentMethod from "../../types/PaymentMethodSchema";
+import { IPaymentMethod } from "../../types/PaymentMethodSchema";
 import { PaymentMethod } from "../schema/PaymentMethodSchema";
 import { addDays, endOfDay, startOfDay, subDays, subMonths } from "date-fns";
 import { User } from "../schema/UserSchema";
@@ -45,7 +45,7 @@ const get_renewal_date_filter = (
     {
       card: [Object],
       _id: new ObjectId('id'),
-      user: new ObjectId('id'),
+      user: IUser,
       payment_method_id: 'id',
       type: 'bank_card',
       saved: true,
