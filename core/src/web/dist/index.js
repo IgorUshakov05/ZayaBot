@@ -15,12 +15,12 @@ if (fileInput && fileInput.files[0]) {
 const startResponse = async () => {
   try {
     const response = await fetch(
-      `http://localhost:4001/api/v1/request?domain=localhost:3000`,
+      `http://localhost:4001/api/v1/request?domain=vk.com`,
       {
         headers: {
-          'x-api-key': '5c705969-5c3a-4f6e-be47-8df800bff492'
+          'x-api-key': '15afa577-f37f-45a2-afbc-7918aaf61285'
         },
-        method: "user_post",
+        method: "POST",
         body: formData,
       }
     );

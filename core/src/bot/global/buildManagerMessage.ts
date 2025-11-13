@@ -1,5 +1,5 @@
 import IApplication from "../../types/ApplicationSchema";
-
+import conf from "../../config/config";
 export function buildManagerMessage(application: IApplication): string {
   const fields: string[] = [`🔔 <b>Заявка #${application.count}:</b>\n`];
 
@@ -10,13 +10,20 @@ export function buildManagerMessage(application: IApplication): string {
     { key: "user_address", label: "🏢 Адрес" },
     { key: "user_company", label: "💼 Компания" },
     { key: "message", label: "💬 Сообщение" },
+    { key: "file", label: "📎 Файл" },
   ] as const;
 
   for (const { key, label } of map) {
-    if (application[key]) fields.push(`${label}: ${application[key]}`);
+    if (key === "file") {
+      if (application[key])
+        fields.push(
+          `${label}: ${conf.BASE_URL}/api/v1/download?file=${application[key]}`
+        );
+    } else {
+      if (application[key]) fields.push(`${label}: ${application[key]}`);
+    }
   }
 
-  if (application.file) fields.push(`📎 Файл: В тестовом отсутствует`);
   if (application.comment) fields.push(`\nКомментарий: ${application.comment}`);
 
   return fields.join("\n");

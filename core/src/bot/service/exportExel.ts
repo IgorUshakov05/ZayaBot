@@ -2,6 +2,7 @@
 import ExcelJS from "exceljs";
 import IApplication, { Status } from "../../types/ApplicationSchema";
 import { toTitleCase } from "../global/toTitleCase";
+import conf from "../../config/config";
 
 export async function exportApplicationsToExcel(
   applications: IApplication[]
@@ -19,6 +20,7 @@ export async function exportApplicationsToExcel(
     "Email",
     "Сообщение",
     "Адрес",
+    "Файл",
     "Менеджер",
     "Создано",
     "Обновлено",
@@ -53,7 +55,9 @@ export async function exportApplicationsToExcel(
         : app.status === Status.inWork
         ? "В работе"
         : "Ожидает";
-
+    let file = app.file
+      ? `${conf.BASE_URL}/api/v1/download?file=${app.file}`
+      : false;
     sheet.addRow([
       app.count,
       status,
@@ -64,6 +68,7 @@ export async function exportApplicationsToExcel(
       app.user_post || "-",
       app.message || "-",
       app.user_address || "-",
+      file || "-",
       managerName,
       new Date(app.createdAt).toLocaleString("ru-RU"),
       new Date(app.updatedAt).toLocaleString("ru-RU"),

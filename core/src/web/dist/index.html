@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестовый клиент для API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Тестовый клиент для API</h1>
+    
+    <form id="apiForm">
+        <div class="form-group">
+            <label for="name">Имя:</label>
+            <input type="text" id="name" name="name" value="Иван Иванов">
+        </div>
+        
+        <div class="form-group">
+            <label for="user_phone">Телефон:</label>
+            <input type="text" id="user_phone" name="user_phone" value="+7 (999) 123-45-67">
+        </div>
+        
+        <div class="form-group">
+            <label for="user_post">Email:</label>
+            <input type="email" id="user_post" name="user_post" value="ivan@example.com">
+        </div>
+        
+        <div class="form-group">
+            <label for="user_company">Компания:</label>
+            <input type="text" id="user_company" name="user_company" value="Моя Компания">
+        </div>
+        
+        <div class="form-group">
+            <label for="user_address">Адрес:</label>
+            <input type="text" id="user_address" name="user_address" value="г. Москва, ул. Ленина, д.1">
+        </div>
+        
+        <div class="form-group">
+            <label for="message">Сообщение:</label>
+            <textarea id="message" name="message" rows="4">Это тестовое сообщение</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="file">Файл (опционально):</label>
+            <input type="file" id="file" name="file">
+        </div>
+        
+        <div class="form-group">
+            <label for="domain">Домен:</label>
+            <input type="text" id="domain" name="domain" value="vk.com">
+        </div>
+        
+        <div class="form-group">
+            <label for="apiKey">API Key:</label>
+            <input type="text" id="apiKey" name="apiKey" value="15afa577-f37f-45a2-afbc-7918aaf61285">
+        </div>
+        
+        <button type="submit">Отправить запрос</button>
+    </form>
+    
+    <div id="response" class="response"></div>
+
+    <script>
+        document.getElementById('apiForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const fields = ['name', 'user_phone', 'user_post', 'user_company', 'user_address', 'message'];
+            
+            // Добавляем текстовые поля
+            fields.forEach(field => {
+                const value = document.getElementById(field).value;
+                if (value) {
+                    formData.append(field, value);
+                }
+            });
+            
+            // Добавляем файл, если выбран
+            const fileInput = document.getElementById('file');
+            if (fileInput && fileInput.files[0]) {
+                formData.append("file", fileInput.files[0]);
+            }
+            
+            const domain = document.getElementById('domain').value;
+            const apiKey = document.getElementById('apiKey').value;
+            
+            try {
+                const response = await fetch(
+                    `http://localhost:4001/api/v1/request?domain=${encodeURIComponent(domain)}`,
+                    {
+                        headers: {
+                            'x-api-key': apiKey
+                        },
+                        method: "POST",
+                        body: formData,
+                    }
+                );
+
+                const result = await response.json();
+                console.log("Ответ сервера:", result);
+
+                const responseDiv = document.getElementById('response');
+                responseDiv.style.display = 'block';
+                
+                if (result.success) {
+                    responseDiv.className = 'response success';
+                    responseDiv.innerHTML = `
+                        <strong>Успех!</strong><br>
+                        Заявка успешно отправлена!<br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.innerHTML = `
+                        <strong>Ошибка:</strong><br>
+                        <pre>${JSON.stringify(result.errors || result, null, 2)}</pre>
+                    `;
+                }
+            } catch (err) {
+                console.error("Ошибка при отправке формы:", err);
+                const responseDiv = document.getElementById('response');
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.innerHTML = `
+                    <strong>Ошибка сети:</strong><br>
+                    ${err.message}
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

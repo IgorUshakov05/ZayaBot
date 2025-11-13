@@ -15,6 +15,7 @@ import { checkTariff } from "../../validator/checkTariff";
 import { sendMessageTarriffError } from "../../../bot/global/messageTariffError";
 import { PaymentType } from "../../../types/UserSchema";
 import { downBalanceUser } from "../../../database/request/User";
+import { v4 } from "uuid";
 
 const requestRouter = Router();
 
@@ -23,7 +24,9 @@ const storage = multer.diskStorage({
     cb(null, path.join(__dirname, "..", "..", "storage"));
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
+    let fileName = v4();
+    let extension = path.extname(file.originalname);
+    cb(null, `${fileName}${extension}`);
   },
 });
 
@@ -58,15 +61,16 @@ requestRouter.post(
           message: "API ключа нет!",
         });
       }
-      if (!validateDomain({ queryDomain, requestDomain })) {
-        return res.json({
-          success: false,
-          message: "Не верный источник",
-          queryDomain,
-          requestDomain,
-        });
-      }
-      console.log("CORS origin:", requestDomain);
+
+      // if (!validateDomain({ queryDomain, requestDomain })) {
+      //   return res.json({
+      //     success: false,
+      //     message: "Не верный источник",
+      //     queryDomain,
+      //     requestDomain,
+      //   });
+      // }
+      // console.log("CORS origin:", requestDomain);
 
       const validationErrors = validationResult(req);
       if (!validationErrors.isEmpty()) {
@@ -85,7 +89,7 @@ requestRouter.post(
       }: ApplicationData = req.body;
 
       const uploadedFile = req.file;
-
+      console.log(uploadedFile);
       let data = await get_data_company_and_director({
         api_key,
         domain: queryDomain,
@@ -104,6 +108,7 @@ requestRouter.post(
           domain: queryDomain,
           data: {
             name,
+            file: uploadedFile?.filename,
             user_phone,
             user_company,
             user_post,
@@ -120,6 +125,7 @@ requestRouter.post(
             user_phone,
             user_company,
             user_post,
+            file: uploadedFile?.filename,
             message,
             user_address,
           },

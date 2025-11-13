@@ -1,4 +1,5 @@
 // service/exportCsv.ts
+import conf from "../../config/config";
 import IApplication, { Status } from "../../types/ApplicationSchema";
 import IUser from "../../types/UserSchema";
 
@@ -17,6 +18,7 @@ export async function exportApplicationsToCSV(
     "Email",
     "Сообщение",
     "Адрес",
+    "Файл",
     "Менеджер",
     "Создано",
     "Обновлено",
@@ -41,7 +43,9 @@ export async function exportApplicationsToCSV(
     const managerName = app.manager
       ? `${app.manager.name || ""} ${app.manager.surname || ""}`.trim() || "—"
       : "—";
-
+    let file = app.file
+      ? `${conf.BASE_URL}/api/v1/download?file=${app.file}`
+      : null;
     return [
       app.count ?? 0,
       statusText,
@@ -52,6 +56,7 @@ export async function exportApplicationsToCSV(
       escape(app.user_post),
       escape(app.message),
       escape(app.user_address),
+      escape(file),
       escape(managerName),
       app.createdAt ? new Date(app.createdAt).toLocaleString("ru-RU") : "—",
       app.updatedAt ? new Date(app.updatedAt).toLocaleString("ru-RU") : "—",
