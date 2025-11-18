@@ -140,7 +140,8 @@ const registrationWizard = new Scenes.WizardScene<MyContext>(
         }
       );
       await ctx.replyWithDocument({
-        source: path.join(__filename),
+        source: path.join(__dirname, "..", "..", "media", "Documentation.pdf"),
+
         filename: "Документация.pdf",
       });
 

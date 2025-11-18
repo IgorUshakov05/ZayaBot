@@ -16,5 +16,9 @@
     "ignoreDeprecations": "5.0"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+
+  "exclude": ["node_modules"],
+  "assets": {
+    "include": ["src/media/Documentation.pdf"]
+  }
 }

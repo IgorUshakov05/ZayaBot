@@ -8,6 +8,7 @@ interface Config {
   SHOP_ID: string;
   BASE_URL: string;
   BOT_TAG: string;
+  ADMIN_MAIL: string;
   BOT_TITLE: string;
   YOOUKASSA_SECKRET_KEY: string;
   PRICE_PER_REQUEST: number;
@@ -16,6 +17,7 @@ interface Config {
 
 const conf: Config = {
   PORT: Number(process.env.PORT),
+  ADMIN_MAIL: String(process.env.ADMIN_MAIL),
   MODE: process.env.MODE as "DEV" | "PROD",
   SHOP_ID: String(process.env.SHOP_ID),
   PRICE_PER_REQUEST: Number(process.env.PRICE_PER_REQUEST),

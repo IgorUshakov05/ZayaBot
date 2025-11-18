@@ -91,6 +91,55 @@ export const createUser = async ({
   }
 };
 
+export const getEmail = async (
+  chat_id: number
+): Promise<
+  { success: true; email: string } | { success: false; message: string }
+> => {
+  try {
+    let user = await User.findOne({ chat_id });
+    if (!user)
+      return {
+        success: false,
+        message: "Ой, кажется, вы ещё не зарегистрированы в системе! 😕 /start",
+      };
+    if (!user.mail)
+      return { success: false, message: "Пожалуйста, укажите вашу почту! 📧" };
+    return { success: true, email: user.mail };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message:
+        "Упс, случилась ошибка с базой данных! 😞 Попробуйте позже. /start",
+    };
+  }
+};
+
+export const updateEmail = async (
+  chat_id: number,
+  new_email: string
+): Promise<{ success: true } | { success: false; message: string }> => {
+  try {
+    let user = await User.findOne({ chat_id });
+    if (!user)
+      return {
+        success: false,
+        message: "Ой, кажется, вы ещё не зарегистрированы в системе! 😕 /start",
+      };
+    user.mail = new_email;
+    await user.save();
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message:
+        "Упс, случилась ошибка с базой данных! 😞 Попробуйте позже. /start",
+    };
+  }
+};
+
 export const getManagers = async (
   chat_id: number
 ): Promise<

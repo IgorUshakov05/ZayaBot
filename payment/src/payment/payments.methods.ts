@@ -46,12 +46,26 @@ export type CreatePayResult =
 export const create_auto_pay = async (
   chat_id: number,
   payment_method_id: string,
-  paymentPlan: PaymentPlan
+  paymentPlan: PaymentPlan,
+  email: string
 ): Promise<CreatePayResult> => {
   try {
     let IdempotenceKey = v4();
     let amount = PricePlan[paymentPlan];
-
+    const receipt = {
+      customer: { email },
+      items: [
+        {
+          description: `Автоплатеж подписки «${paymentPlan}`,
+          quantity: 1,
+          amount: { value: amount.toFixed(2), currency: "RUB" },
+          vat_code: 1,
+          payment_mode: "full_payment",
+          payment_subject: "income",
+        },
+      ],
+      tax_system_code: 6,
+    };
     const response = await axios.post(
       "https://api.yookassa.ru/v3/payments",
       {
@@ -62,6 +76,7 @@ export const create_auto_pay = async (
         payment_method_id,
         capture: true,
         description: `Автоплатеж на ${amount} руб.`,
+        receipt,
         metadata: {
           chat_id,
           paymentType: PaymentType.SUBSCRIPTION,
